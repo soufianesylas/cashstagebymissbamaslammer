@@ -31,6 +31,19 @@ const WalletScreen = () => (
       </button>
     </div>
 
+    {/* Payment methods */}
+    <p className="px-4 mt-4 text-[10px] text-muted-foreground tracking-widest">PAYMENT METHODS</p>
+    <div className="grid grid-cols-2 gap-3 mx-3 mt-2">
+      <button className="py-3 rounded-xl bg-card border border-border font-bold text-sm flex items-center justify-center gap-2">
+        <span className="text-[#003087]">Pay</span><span className="text-[#009cde]">Pal</span>
+        <span className="ml-auto text-[10px] text-primary">●</span>
+      </button>
+      <button className="py-3 rounded-xl bg-card border border-border font-bold text-sm flex items-center justify-center gap-2">
+        <span className="text-[#635bff]">stripe</span>
+        <span className="ml-auto text-[10px] text-muted-foreground">○</span>
+      </button>
+    </div>
+
     <div className="grid grid-cols-2 gap-2 mx-3 mt-4 border-b border-border">
       <button className="py-2 text-xs font-bold border-b-2 border-primary text-foreground">Transactions</button>
       <button className="py-2 text-xs font-bold text-muted-foreground">Earnings</button>

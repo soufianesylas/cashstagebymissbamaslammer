@@ -1,4 +1,4 @@
-import { Dice5, Zap, Bell, Search } from "lucide-react";
+import { Dice5, Zap, Bell, Search, Mic, Users, Swords, ShieldOff } from "lucide-react";
 import rapperRed from "@/assets/rapper-red.jpg";
 import rapperBlue from "@/assets/rapper-blue.jpg";
 import album from "@/assets/album-art.jpg";
@@ -43,11 +43,32 @@ const HomeScreen = () => (
           <Dice5 className="h-14 w-14" strokeWidth={2.5} />
         </div>
         <h1 className="font-display text-3xl mt-4 text-glow">ROLL THE DICE</h1>
-        <p className="text-xs text-muted-foreground mt-1">Find your opponent. Anonymous. Random. Real money.</p>
+        <p className="text-xs text-muted-foreground mt-1">Solo Drop · Collab · Battle. Anonymous. Random. Real money.</p>
         <button className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
           <Zap className="h-4 w-4 fill-current" /> Start Battle
         </button>
       </div>
+    </div>
+
+    {/* No-AI badge */}
+    <div className="mx-4 mt-3 flex items-center justify-center gap-2 py-2 rounded-full bg-secondary/60 border border-primary/30">
+      <ShieldOff className="h-3.5 w-3.5 text-primary" />
+      <p className="text-[10px] font-bold tracking-widest text-primary">100% HUMAN · NO AI · RECORDED IN-APP</p>
+    </div>
+
+    {/* Three modes */}
+    <div className="grid grid-cols-3 gap-2 mx-4 mt-3">
+      {[
+        { Icon: Mic, label: "SOLO DROP", sub: "Drop a track", color: "text-accent border-accent/40 bg-accent/10" },
+        { Icon: Users, label: "COLLAB", sub: "Build together", color: "text-battle-blue border-battle-blue/40 bg-battle-blue/10" },
+        { Icon: Swords, label: "BATTLE", sub: "Win the pool", color: "text-primary border-primary/40 bg-primary/10" },
+      ].map((m) => (
+        <button key={m.label} className={`p-2.5 rounded-xl border text-left ${m.color}`}>
+          <m.Icon className="h-4 w-4 mb-1" />
+          <p className="text-[10px] font-bold leading-tight">{m.label}</p>
+          <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{m.sub}</p>
+        </button>
+      ))}
     </div>
 
     {/* Live battles */}
