@@ -7,8 +7,10 @@ import Index from "./pages/Index.tsx";
 import AppMockup from "./pages/AppMockup.tsx";
 import PitchDeck from "./pages/PitchDeck.tsx";
 import Auth from "./pages/Auth.tsx";
+import Studio from "./pages/Studio.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/studio" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
             <Route path="/app" element={<AppMockup />} />
             <Route path="/pitch" element={<PitchDeck />} />
             <Route path="*" element={<NotFound />} />
