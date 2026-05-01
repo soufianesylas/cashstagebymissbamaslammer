@@ -43,7 +43,7 @@ const HomeScreen = () => (
           <Dice5 className="h-14 w-14" strokeWidth={2.5} />
         </div>
         <h1 className="font-display text-3xl mt-4 text-glow">ROLL THE DICE</h1>
-        <p className="text-xs text-muted-foreground mt-1">Find your opponent. Anonymous. Random. Real money.</p>
+        <p className="text-xs text-muted-foreground mt-1">Solo Drop · Collab · Battle. Anonymous. Random. Real money.</p>
         <button className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
           <Zap className="h-4 w-4 fill-current" /> Start Battle
         </button>
