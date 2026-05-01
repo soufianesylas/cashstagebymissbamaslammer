@@ -1,4 +1,4 @@
-import { Dice5, Zap, Bell, Search } from "lucide-react";
+import { Dice5, Zap, Bell, Search, Mic, Users, Swords, ShieldOff } from "lucide-react";
 import rapperRed from "@/assets/rapper-red.jpg";
 import rapperBlue from "@/assets/rapper-blue.jpg";
 import album from "@/assets/album-art.jpg";
