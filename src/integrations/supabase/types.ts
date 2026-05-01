@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tracks: {
+        Row: {
+          audio_path: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          mode: string
+          play_count: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_path: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          mode?: string
+          play_count?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_path?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          mode?: string
+          play_count?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
