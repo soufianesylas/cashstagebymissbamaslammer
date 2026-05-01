@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import csLogo from "@/assets/cs-logo.png";
+import { useAuth } from "@/hooks/useAuth";
 
 const links = [
   { to: "/", label: "Home" },
@@ -9,6 +11,7 @@ const links = [
 
 const SiteNav = () => {
   const { pathname } = useLocation();
+  const { user, signOut } = useAuth();
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60">
       <nav className="container flex items-center justify-between h-16">
@@ -34,12 +37,30 @@ const SiteNav = () => {
             </li>
           ))}
         </ul>
-        <Link
-          to="/app"
-          className="hidden sm:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-accent text-accent-foreground font-bold text-sm hover:scale-105 transition-transform glow-gold"
-        >
-          Enter Stage
-        </Link>
+        {user ? (
+          <div className="hidden sm:flex items-center gap-2">
+            <Link
+              to="/app"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-accent text-accent-foreground font-bold text-sm hover:scale-105 transition-transform glow-gold"
+            >
+              Enter Stage
+            </Link>
+            <button
+              onClick={signOut}
+              className="h-9 w-9 grid place-items-center rounded-full bg-secondary hover:bg-secondary/70"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/auth"
+            className="hidden sm:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-accent text-accent-foreground font-bold text-sm hover:scale-105 transition-transform glow-gold"
+          >
+            Sign In
+          </Link>
+        )}
       </nav>
     </header>
   );
