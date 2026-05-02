@@ -20,7 +20,6 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
-          csb_balance: number
           display_name: string | null
           id: string
           updated_at: string
@@ -30,7 +29,6 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          csb_balance?: number
           display_name?: string | null
           id: string
           updated_at?: string
@@ -40,7 +38,6 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          csb_balance?: number
           display_name?: string | null
           id?: string
           updated_at?: string
@@ -100,6 +97,24 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          csb_balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          csb_balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          csb_balance?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
