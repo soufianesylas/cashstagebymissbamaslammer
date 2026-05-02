@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.prevent_csb_balance_change() FROM PUBLIC, anon, authenticated;
