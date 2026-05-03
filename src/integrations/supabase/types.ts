@@ -131,6 +131,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_play_count: { Args: { _track_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "artist"
