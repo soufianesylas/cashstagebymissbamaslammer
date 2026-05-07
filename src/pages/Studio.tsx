@@ -193,6 +193,7 @@ const Studio = () => {
       setUploading(false);
     }
   };
+  const isRecording = recorder.state === "recording";
   const isPaused = recorder.state === "paused";
   const hasRecording = recorder.state === "stopped" && recorder.audioBlob;
   const canPickBeat = recorder.state === "idle";
