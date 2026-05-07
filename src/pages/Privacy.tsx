@@ -117,7 +117,28 @@ const Privacy = () => {
           </div>
 
           <div>
-            <h2 className="font-display text-2xl mb-2">10. Changes</h2>
+            <h2 className="font-display text-2xl mb-2">10. Google Play Data Safety</h2>
+            <p className="mb-2">For our Google Play listing, we declare the following:</p>
+            <ul className="list-disc pl-6 space-y-1 text-sm">
+              <li><strong>Data collected:</strong> email, name, user-generated audio, in-app actions (plays, votes, scores), purchase history, approximate location (from IP only).</li>
+              <li><strong>Data shared with third parties:</strong> none, except payment processors (Google Play Billing) and AdMob (only for free-tier users, anonymized device ID for ad personalization).</li>
+              <li><strong>Encryption in transit:</strong> yes (HTTPS / TLS).</li>
+              <li><strong>Data deletion:</strong> users can delete their account and all associated data by emailing <a className="underline" href="mailto:privacy@cashstage.app">privacy@cashstage.app</a>.</li>
+              <li><strong>Children:</strong> the app is rated 13+. We do not knowingly collect data from children under 13.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-display text-2xl mb-2">11. User-generated content & moderation</h2>
+            <p>
+              All audio is recorded or uploaded by users. We provide an in-app report button on every track.
+              Reports are reviewed by our moderation team within 24 hours and offending content is hidden or removed.
+              Content that infringes copyright, depicts minors sexually, contains hate speech, or is AI-generated is prohibited.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="font-display text-2xl mb-2">12. Changes</h2>
             <p>
               If we update this policy we will revise the "Last updated" date and, for material
               changes, notify you in-app.
