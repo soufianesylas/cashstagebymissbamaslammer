@@ -326,6 +326,33 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          current_period_end: string | null
+          daily_drops: number
+          status: string
+          tier: Database["public"]["Enums"]["tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_period_end?: string | null
+          daily_drops?: number
+          status?: string
+          tier?: Database["public"]["Enums"]["tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_period_end?: string | null
+          daily_drops?: number
+          status?: string
+          tier?: Database["public"]["Enums"]["tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tracks: {
         Row: {
           audio_path: string
@@ -532,9 +559,14 @@ export type Database = {
         Returns: boolean
       }
       open_todays_contest: { Args: never; Returns: string }
+      user_tier: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["tier"]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "artist"
+      tier: "free" | "platinum" | "vip"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -663,6 +695,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "artist"],
+      tier: ["free", "platinum", "vip"],
     },
   },
 } as const
