@@ -5,6 +5,7 @@ import {
   LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
 } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
+import { ReportTrackButton } from "@/components/ReportTrackButton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
