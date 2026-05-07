@@ -214,6 +214,29 @@ const Studio = () => {
           </div>
         </div>
 
+        {/* Upload an existing track */}
+        <div className="mt-8 rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-4 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] tracking-widest text-accent font-bold">UPLOAD A TRACK</p>
+            <p className="text-sm">Got a finished song? Drop the file straight into your stage.</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">MP3 / M4A / WAV · max 25MB</p>
+          </div>
+          <label className={`shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm inline-flex items-center gap-2 cursor-pointer ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {uploading ? "UPLOADING…" : "UPLOAD"}
+            <input
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUpload(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+
         {/* Free beats library */}
         <section className="mt-10">
           <div className="flex items-end justify-between">
