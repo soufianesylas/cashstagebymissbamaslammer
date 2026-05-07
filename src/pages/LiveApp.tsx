@@ -26,6 +26,8 @@ interface FeedTrack {
   audio_url: string;
   artist_name?: string;
   is_featured?: boolean;
+  is_boosted?: boolean;
+  boost_rank?: number;
 }
 
 interface Profile {
@@ -34,9 +36,13 @@ interface Profile {
   avatar_url: string | null;
 }
 
-interface LeaderRow extends Profile {
-  total_plays: number;
-  track_count: number;
+interface LeaderRow {
+  track_id: string;
+  title: string;
+  artist_name: string;
+  score_count: number;
+  average_score: number;
+  feature_worthy_count: number;
 }
 
 const formatTime = (s: number) => {
