@@ -32,7 +32,7 @@ const Moderation = () => {
     const { data: rep } = await (supabase as any)
       .from("track_reports").select("*").eq("status", "open").order("created_at", { ascending: false });
     setReports(rep ?? []);
-    const ids = Array.from(new Set((rep ?? []).map((r: Report) => r.track_id)));
+    const ids = Array.from(new Set((rep ?? []).map((r: Report) => r.track_id))) as string[];
     if (ids.length) {
       const { data: tr } = await supabase.from("tracks").select("id, title, is_hidden, user_id").in("id", ids);
       const map: typeof tracks = {};
