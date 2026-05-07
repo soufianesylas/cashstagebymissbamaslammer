@@ -111,7 +111,7 @@ const LiveApp = () => {
       nameMap = new Map((profs ?? []).map((p) => [p.id, p.artist_name]));
     }
 
-    const allPaths = [...(tracks ?? []), ...(mine ?? [])].map((t: any) => t.audio_path);
+    const allPaths = [...(tracks ?? []), ...(mine ?? []), ...(feat ?? [])].map((t: any) => t.audio_path);
     const { signedTrackUrls } = await import("@/lib/storage");
     const urlMap = await signedTrackUrls(allPaths);
 
@@ -125,6 +125,7 @@ const LiveApp = () => {
 
     setFeed(decorate(tracks ?? []));
     setMyTracks(decorate(mine ?? []));
+    setFeatured(decorate(feat ?? []));
 
     // Compute leaderboard from feed (top artists by total plays)
     const agg = new Map<string, { plays: number; count: number }>();
@@ -172,8 +173,11 @@ const LiveApp = () => {
       setPlayingId(null);
       return;
     }
+    // Free users watch a 30s ad before each track play (skips own tracks)
+    if (track.user_id !== user?.id) {
+      try { await gateAd(tier); } catch { /* ignore */ }
+    }
     setPlayingId(track.id);
-    // Bump play count via SECURITY DEFINER RPC (owners are blocked server-side)
     if (track.user_id !== user?.id) {
       const { error } = await supabase.rpc("increment_play_count", { _track_id: track.id });
       if (!error) {
