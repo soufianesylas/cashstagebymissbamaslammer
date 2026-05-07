@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2 } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
 
 type Mode = "solo" | "collab" | "battle";
 
@@ -40,6 +41,18 @@ const Studio = () => {
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
+  // Beat selection
+  const [selectedBeatId, setSelectedBeatId] = useState<string | null>(null);
+  const [beatVolume, setBeatVolume] = useState(0.7);
+  const [micVolume, setMicVolume] = useState(1);
+  const previewRef = useRef<HTMLAudioElement | null>(null);
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
+
+  const selectedBeat: FreeBeat | null = useMemo(
+    () => FREE_BEATS.find((b) => b.id === selectedBeatId) ?? null,
+    [selectedBeatId]
+  );
+
   const loadTracks = async () => {
     if (!user) return;
     setLoadingTracks(true);
@@ -65,6 +78,42 @@ const Studio = () => {
     loadTracks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  const previewBeat = (beat: FreeBeat) => {
+    if (previewingId === beat.id) {
+      previewRef.current?.pause();
+      setPreviewingId(null);
+      return;
+    }
+    if (previewRef.current) {
+      previewRef.current.pause();
+    }
+    const audio = new Audio(beat.url);
+    audio.volume = 0.7;
+    audio.play().catch(() => toast.error("Could not preview beat"));
+    audio.onended = () => setPreviewingId(null);
+    previewRef.current = audio;
+    setPreviewingId(beat.id);
+  };
+
+  useEffect(() => {
+    return () => {
+      previewRef.current?.pause();
+      previewRef.current = null;
+    };
+  }, []);
+
+  const handleStart = async () => {
+    if (previewRef.current) {
+      previewRef.current.pause();
+      setPreviewingId(null);
+    }
+    await recorder.start({
+      beatUrl: selectedBeat?.url ?? null,
+      beatVolume,
+      micVolume,
+    });
+  };
 
   const handleSave = async () => {
     if (!user || !recorder.audioBlob) return;
@@ -115,6 +164,7 @@ const Studio = () => {
   const isRecording = recorder.state === "recording";
   const isPaused = recorder.state === "paused";
   const hasRecording = recorder.state === "stopped" && recorder.audioBlob;
+  const canPickBeat = recorder.state === "idle";
 
   return (
     <div className="min-h-screen pt-24 pb-20 stage-bg">
@@ -132,11 +182,86 @@ const Studio = () => {
           </div>
         </div>
 
+        {/* Free beats library */}
+        <section className="mt-10">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs tracking-widest text-accent font-bold">FREE BEATS LIBRARY</p>
+              <h2 className="font-display text-3xl mt-1">PICK YOUR BEAT</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                100% royalty-free instrumentals. Rap straight over them — they'll be baked into your recording.
+              </p>
+            </div>
+            {selectedBeat && (
+              <button
+                onClick={() => setSelectedBeatId(null)}
+                disabled={!canPickBeat}
+                className="text-[10px] tracking-widest text-muted-foreground hover:text-destructive disabled:opacity-40"
+              >
+                CLEAR BEAT
+              </button>
+            )}
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+            {FREE_BEATS.map((beat) => {
+              const isSelected = selectedBeatId === beat.id;
+              const isPreviewing = previewingId === beat.id;
+              return (
+                <div
+                  key={beat.id}
+                  className={`p-4 rounded-2xl border transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                      : "border-border bg-card hover:border-primary/40"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{beat.title}</p>
+                      <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5">
+                        {beat.vibe} · {beat.bpm} BPM
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => previewBeat(beat)}
+                      className="h-8 w-8 grid place-items-center rounded-full bg-secondary border border-border hover:border-accent shrink-0"
+                      aria-label="Preview beat"
+                    >
+                      {isPreviewing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => canPickBeat && setSelectedBeatId(isSelected ? null : beat.id)}
+                    disabled={!canPickBeat}
+                    className={`mt-3 w-full py-2 rounded-lg text-[11px] font-bold tracking-wider transition-colors disabled:opacity-40 ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-primary/20"
+                    }`}
+                  >
+                    {isSelected ? "SELECTED" : "USE BEAT"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
         {/* Recorder card */}
         <div className="mt-10 rounded-3xl border border-primary/30 p-8 relative overflow-hidden"
           style={{ background: "radial-gradient(ellipse at center, hsl(150 100% 15% / 0.4), hsl(0 0% 5%) 70%)" }}>
           <div className="absolute -top-20 left-1/4 h-60 w-32 bg-primary/20 blur-3xl animate-spotlight" />
           <div className="absolute -top-20 right-1/4 h-60 w-32 bg-accent/20 blur-3xl animate-spotlight" style={{ animationDelay: "1.2s" }} />
+
+          {selectedBeat && (
+            <div className="relative mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/40">
+              <Headphones className="h-3.5 w-3.5 text-primary" />
+              <p className="text-[10px] font-bold tracking-widest text-primary">
+                BEAT: {selectedBeat.title.toUpperCase()} · {selectedBeat.bpm} BPM
+              </p>
+            </div>
+          )}
 
           {/* Waveform */}
           <div className="relative flex items-end justify-center gap-1 h-32">
@@ -161,11 +286,41 @@ const Studio = () => {
             </p>
           </div>
 
+          {/* Mixer (only before recording, when a beat is selected) */}
+          {canPickBeat && selectedBeat && (
+            <div className="relative mt-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
+              <label className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><Mic className="h-3 w-3" /> MIC</span>
+                  <span>{Math.round(micVolume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={1.5} step={0.05}
+                  value={micVolume}
+                  onChange={(e) => setMicVolume(parseFloat(e.target.value))}
+                  className="w-full accent-primary"
+                />
+              </label>
+              <label className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><Volume2 className="h-3 w-3" /> BEAT</span>
+                  <span>{Math.round(beatVolume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={1.5} step={0.05}
+                  value={beatVolume}
+                  onChange={(e) => setBeatVolume(parseFloat(e.target.value))}
+                  className="w-full accent-accent"
+                />
+              </label>
+            </div>
+          )}
+
           {/* Controls */}
           <div className="relative flex justify-center items-center gap-4 mt-6">
             {recorder.state === "idle" && (
               <button
-                onClick={recorder.start}
+                onClick={handleStart}
                 className="h-20 w-20 grid place-items-center rounded-full bg-primary text-primary-foreground hover:scale-105 transition-transform glow-primary"
               >
                 <Mic className="h-8 w-8" />
