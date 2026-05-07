@@ -17,9 +17,11 @@ import ChatRoom from "./pages/ChatRoom.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import WeeklyContest from "./pages/WeeklyContest.tsx";
 import CrewChatRedirect from "./pages/CrewChatRedirect.tsx";
+import JudgingSessions from "./pages/JudgingSessions.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AdGateProvider } from "./components/AdGate";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <AdGateProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -45,8 +48,10 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/weekly" element={<ProtectedRoute><WeeklyContest /></ProtectedRoute>} />
             <Route path="/crews/:crewId/chat" element={<ProtectedRoute><CrewChatRedirect /></ProtectedRoute>} />
+            <Route path="/judging" element={<ProtectedRoute><JudgingSessions /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AdGateProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { gateAd } from "@/components/AdGate";
+import { useTier } from "@/hooks/useTier";
 
 type Contest = {
   id: string;
@@ -49,6 +51,7 @@ import { signedTrackUrls } from "@/lib/storage";
 
 const BeatOfTheDay = () => {
   const { user } = useAuth();
+  const tier = useTier();
   const [contest, setContest] = useState<Contest | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [myVoteEntry, setMyVoteEntry] = useState<string | null>(null);
@@ -157,6 +160,7 @@ const BeatOfTheDay = () => {
       toast.error("Voting is closed");
       return;
     }
+    try { await gateAd(tier); } catch { /* noop */ }
     const { error } = await supabase.from("contest_votes").insert({
       contest_id: contest.id,
       entry_id: entry.id,

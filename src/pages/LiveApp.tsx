@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Swords, Music, Users, Wallet, Mic, Play, Pause, Loader2,
-  LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw,
+  LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
 } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { gateAd, type Tier } from "@/components/AdGate";
 
 type Tab = "home" | "feed" | "studio" | "leaderboard" | "wallet";
 type Mode = "solo" | "collab" | "battle";
@@ -23,6 +24,7 @@ interface FeedTrack {
   user_id: string;
   audio_url: string;
   artist_name?: string;
+  is_featured?: boolean;
 }
 
 interface Profile {
@@ -59,11 +61,13 @@ const LiveApp = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [feed, setFeed] = useState<FeedTrack[]>([]);
+  const [featured, setFeatured] = useState<FeedTrack[]>([]);
   const [myTracks, setMyTracks] = useState<FeedTrack[]>([]);
   const [leaders, setLeaders] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,21 +77,28 @@ const LiveApp = () => {
   const loadAll = async () => {
     if (!user) return;
     setRefreshing(true);
-    const [{ data: prof }, { data: wal }, { data: tracks }, { data: mine }] = await Promise.all([
+    const [{ data: prof }, { data: wal }, { data: tracks }, { data: mine }, { data: feat }, { data: sub }] = await Promise.all([
       supabase.from("profiles").select("id, artist_name, avatar_url").eq("id", user.id).maybeSingle(),
       supabase.from("wallets").select("csb_balance").eq("user_id", user.id).maybeSingle(),
       supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
         .order("play_count", { ascending: false })
         .limit(50),
       supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
+      supabase.from("tracks")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle(),
     ]);
 
     setProfile(prof ?? null);
     setBalance(wal?.csb_balance ?? 0);
+    setTier(((sub?.tier as Tier) ?? "free"));
 
     // Build artist name lookup
     const ids = Array.from(new Set((tracks ?? []).map((t) => t.user_id)));
@@ -100,7 +111,7 @@ const LiveApp = () => {
       nameMap = new Map((profs ?? []).map((p) => [p.id, p.artist_name]));
     }
 
-    const allPaths = [...(tracks ?? []), ...(mine ?? [])].map((t: any) => t.audio_path);
+    const allPaths = [...(tracks ?? []), ...(mine ?? []), ...(feat ?? [])].map((t: any) => t.audio_path);
     const { signedTrackUrls } = await import("@/lib/storage");
     const urlMap = await signedTrackUrls(allPaths);
 
@@ -114,6 +125,7 @@ const LiveApp = () => {
 
     setFeed(decorate(tracks ?? []));
     setMyTracks(decorate(mine ?? []));
+    setFeatured(decorate(feat ?? []));
 
     // Compute leaderboard from feed (top artists by total plays)
     const agg = new Map<string, { plays: number; count: number }>();
@@ -161,8 +173,11 @@ const LiveApp = () => {
       setPlayingId(null);
       return;
     }
+    // Free users watch a 30s ad before each track play (skips own tracks)
+    if (track.user_id !== user?.id) {
+      try { await gateAd(tier); } catch { /* ignore */ }
+    }
     setPlayingId(track.id);
-    // Bump play count via SECURITY DEFINER RPC (owners are blocked server-side)
     if (track.user_id !== user?.id) {
       const { error } = await supabase.rpc("increment_play_count", { _track_id: track.id });
       if (!error) {
@@ -284,10 +299,14 @@ const LiveApp = () => {
                 <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
                 <p className="font-display text-lg mt-1">OPEN ROOMS</p>
               </button>
+              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent col-span-2">
+                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
+                <p className="font-display text-lg mt-1">SCORE 1–10 (INVITE ONLY)</p>
+              </button>
             </div>
           )}
           {tab === "feed" && (
-            <FeedTab tracks={feed} playingId={playingId} onPlay={handlePlay} />
+            <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} />
           )}
           {tab === "studio" && (
             <StudioTab myTracks={myTracks} playingId={playingId} onPlay={handlePlay} onOpenStudio={() => navigate("/studio")} />
@@ -349,8 +368,16 @@ const Stat = ({ label, value, sub }: { label: string; value: string; sub: string
   </div>
 );
 
-const FeedTab = ({ tracks, playingId, onPlay }: { tracks: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; }) => (
+const FeedTab = ({ tracks, featured, playingId, onPlay }: { tracks: FeedTrack[]; featured: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; }) => (
   <div className="space-y-3">
+    {featured.length > 0 && (
+      <>
+        <h2 className="font-display text-2xl flex items-center gap-2"><Star className="h-5 w-5 text-accent" /> Featured Tracks</h2>
+        {featured.map((t) => (
+          <TrackRow key={`f-${t.id}`} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} showArtist />
+        ))}
+      </>
+    )}
     <h2 className="font-display text-2xl">🔥 Trending Drops</h2>
     {tracks.length === 0 ? (
       <Empty icon={Flame} title="NO TRACKS YET" sub="Be the first to drop one in the studio." />
