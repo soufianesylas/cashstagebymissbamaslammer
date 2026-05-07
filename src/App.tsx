@@ -14,6 +14,7 @@ import BeatOfTheDay from "./pages/BeatOfTheDay.tsx";
 import Crews from "./pages/Crews.tsx";
 import ChatList from "./pages/ChatList.tsx";
 import ChatRoom from "./pages/ChatRoom.tsx";
+import Pricing from "./pages/Pricing.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
