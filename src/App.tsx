@@ -19,9 +19,11 @@ import WeeklyContest from "./pages/WeeklyContest.tsx";
 import CrewChatRedirect from "./pages/CrewChatRedirect.tsx";
 import JudgingSessions from "./pages/JudgingSessions.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Boosts from "./pages/Boosts.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
+import { JudgingTimerProvider } from "./components/JudgingTimer";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AdGateProvider>
+          <JudgingTimerProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -49,8 +52,10 @@ const App = () => (
             <Route path="/weekly" element={<ProtectedRoute><WeeklyContest /></ProtectedRoute>} />
             <Route path="/crews/:crewId/chat" element={<ProtectedRoute><CrewChatRedirect /></ProtectedRoute>} />
             <Route path="/judging" element={<ProtectedRoute><JudgingSessions /></ProtectedRoute>} />
+            <Route path="/boosts" element={<ProtectedRoute><Boosts /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </JudgingTimerProvider>
           </AdGateProvider>
         </AuthProvider>
       </BrowserRouter>

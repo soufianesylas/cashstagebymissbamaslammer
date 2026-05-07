@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { gateAd, type Tier } from "@/components/AdGate";
+import { useJudging } from "@/components/JudgingTimer";
 
 type Tab = "home" | "feed" | "studio" | "leaderboard" | "wallet";
 type Mode = "solo" | "collab" | "battle";
@@ -57,6 +58,7 @@ const ModeIcon: Record<Mode, typeof Mic> = {
 const LiveApp = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const judging = useJudging();
   const [tab, setTab] = useState<Tab>("home");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [balance, setBalance] = useState<number>(0);
@@ -299,9 +301,17 @@ const LiveApp = () => {
                 <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
                 <p className="font-display text-lg mt-1">OPEN ROOMS</p>
               </button>
-              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent col-span-2">
-                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
-                <p className="font-display text-lg mt-1">SCORE 1–10 (INVITE ONLY)</p>
+              <button onClick={() => judging.open()} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
+                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGE NOW</p>
+                <p className="font-display text-lg mt-1">10 MIN · ANON</p>
+              </button>
+              <button onClick={() => navigate("/boosts")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
+                <p className="text-[10px] tracking-widest text-primary font-bold flex items-center gap-1"><Star className="h-3 w-3" /> BOOST TRACK</p>
+                <p className="font-display text-lg mt-1">$4.99 · $8.99</p>
+              </button>
+              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary col-span-2">
+                <p className="text-[10px] tracking-widest text-muted-foreground font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
+                <p className="font-display text-lg mt-1">INVITE-ONLY PANELS</p>
               </button>
             </div>
           )}
