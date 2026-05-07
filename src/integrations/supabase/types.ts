@@ -296,6 +296,103 @@ export type Database = {
           },
         ]
       }
+      judging_panel: {
+        Row: {
+          created_at: string
+          id: string
+          judge_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          judge_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          judge_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judging_panel_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "judging_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      judging_scores: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          judge_id: string
+          score: number
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          judge_id: string
+          score: number
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          judge_id?: string
+          score?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judging_scores_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "judging_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      judging_sessions: {
+        Row: {
+          closes_at: string
+          contest_id: string
+          created_at: string
+          id: string
+          opens_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at: string
+          contest_id: string
+          created_at?: string
+          id?: string
+          opens_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string
+          contest_id?: string
+          created_at?: string
+          id?: string
+          opens_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           artist_name: string
@@ -359,6 +456,7 @@ export type Database = {
           created_at: string
           duration_seconds: number
           id: string
+          is_featured: boolean
           mode: string
           play_count: number
           title: string
@@ -370,6 +468,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_featured?: boolean
           mode?: string
           play_count?: number
           title: string
@@ -381,6 +480,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_featured?: boolean
           mode?: string
           play_count?: number
           title?: string
@@ -565,7 +665,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "artist"
+      app_role: "admin" | "moderator" | "artist" | "judge"
       tier: "free" | "platinum" | "vip"
     }
     CompositeTypes: {
@@ -694,7 +794,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "artist"],
+      app_role: ["admin", "moderator", "artist", "judge"],
       tier: ["free", "platinum", "vip"],
     },
   },
