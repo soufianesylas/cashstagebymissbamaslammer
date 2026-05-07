@@ -58,6 +58,7 @@ const ModeIcon: Record<Mode, typeof Mic> = {
 const LiveApp = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const judging = useJudging();
   const [tab, setTab] = useState<Tab>("home");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [balance, setBalance] = useState<number>(0);
