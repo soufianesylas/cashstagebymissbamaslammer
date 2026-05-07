@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
 export type RecorderState = "idle" | "recording" | "paused" | "stopped";
+export type VoiceEffect = "clean" | "reverb" | "telephone" | "boom" | "chorus";
 
 interface UseRecorderResult {
   state: RecorderState;
   elapsed: number;
-  levels: number[]; // 32 bars, 0..1
+  levels: number[];
   audioBlob: Blob | null;
   audioUrl: string | null;
   error: string | null;
-  start: (opts?: { beatUrl?: string | null; beatVolume?: number; micVolume?: number }) => Promise<void>;
+  start: (opts?: { beatUrl?: string | null; beatVolume?: number; micVolume?: number; effect?: VoiceEffect }) => Promise<void>;
   pause: () => void;
   resume: () => void;
   stop: () => void;
@@ -88,13 +89,58 @@ export const useAudioRecorder = (): UseRecorderResult => {
       micGain.gain.value = opts?.micVolume ?? 1;
       micSource.connect(micGain);
 
+      // Voice effect chain — output node is `micOut`
+      let micOut: AudioNode = micGain;
+      const eff = opts?.effect ?? "clean";
+      if (eff === "reverb") {
+        const conv = ctx.createConvolver();
+        const len = ctx.sampleRate * 1.8;
+        const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+        for (let ch = 0; ch < 2; ch++) {
+          const d = buf.getChannelData(ch);
+          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
+        }
+        conv.buffer = buf;
+        const wet = ctx.createGain(); wet.gain.value = 0.35;
+        const dry = ctx.createGain(); dry.gain.value = 0.85;
+        const mix = ctx.createGain();
+        micGain.connect(dry).connect(mix);
+        micGain.connect(conv).connect(wet).connect(mix);
+        micOut = mix;
+      } else if (eff === "telephone") {
+        const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 600;
+        const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3200;
+        const dist = ctx.createWaveShaper();
+        const k = 8, n = 256, curve = new Float32Array(n);
+        for (let i = 0; i < n; i++) { const x = (i * 2) / n - 1; curve[i] = ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x)); }
+        dist.curve = curve;
+        micGain.connect(hp).connect(lp).connect(dist);
+        micOut = dist;
+      } else if (eff === "boom") {
+        const ls = ctx.createBiquadFilter(); ls.type = "lowshelf"; ls.frequency.value = 200; ls.gain.value = 8;
+        const peak = ctx.createBiquadFilter(); peak.type = "peaking"; peak.frequency.value = 80; peak.Q.value = 1; peak.gain.value = 6;
+        micGain.connect(ls).connect(peak);
+        micOut = peak;
+      } else if (eff === "chorus") {
+        const delay = ctx.createDelay(); delay.delayTime.value = 0.025;
+        const lfo = ctx.createOscillator(); lfo.frequency.value = 1.5;
+        const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.005;
+        lfo.connect(lfoGain).connect(delay.delayTime); lfo.start();
+        const wet = ctx.createGain(); wet.gain.value = 0.5;
+        const dry = ctx.createGain(); dry.gain.value = 0.8;
+        const mix = ctx.createGain();
+        micGain.connect(dry).connect(mix);
+        micGain.connect(delay).connect(wet).connect(mix);
+        micOut = mix;
+      }
+
       const dest = ctx.createMediaStreamDestination();
-      micGain.connect(dest);
+      micOut.connect(dest);
 
       // Analyser hears the mix
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
-      micGain.connect(analyser);
+      micOut.connect(analyser);
 
       // Optional beat layer
       if (opts?.beatUrl) {
