@@ -64,10 +64,12 @@ const Studio = () => {
     if (error) {
       toast.error("Could not load tracks");
     } else {
+      const { signedTrackUrls } = await import("@/lib/storage");
+      const urlMap = await signedTrackUrls((data ?? []).map((t) => t.audio_path));
       const withUrls = (data ?? []).map((t) => ({
         ...t,
         mode: t.mode as Mode,
-        audio_url: supabase.storage.from("tracks").getPublicUrl(t.audio_path).data.publicUrl,
+        audio_url: urlMap.get(t.audio_path) ?? "",
       }));
       setTracks(withUrls);
     }

@@ -18,7 +18,7 @@ type Entry = {
   contest_id: string;
   beat_id: string;
   slot: number;
-  beat?: { id: string; title: string; bpm: number | null; vibe: string | null; audio_path: string };
+  beat?: { id: string; title: string; bpm: number | null; vibe: string | null; audio_path: string; signed_url?: string };
   votes: number;
 };
 
@@ -45,8 +45,7 @@ const useCountdown = (target: Date) => {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
 
-const audioUrl = (path: string) =>
-  supabase.storage.from("tracks").getPublicUrl(path).data.publicUrl;
+import { signedTrackUrls } from "@/lib/storage";
 
 const BeatOfTheDay = () => {
   const { user } = useAuth();
@@ -93,13 +92,14 @@ const BeatOfTheDay = () => {
       .eq("contest_id", c.id);
 
     const tallyMap = new Map((tallies ?? []).map((t: any) => [t.entry_id, t.vote_count]));
+    const urlMap = await signedTrackUrls((ents ?? []).map((e: any) => e.contest_beats?.audio_path).filter(Boolean));
     setEntries(
       (ents ?? []).map((e: any) => ({
         id: e.id,
         contest_id: e.contest_id,
         beat_id: e.beat_id,
         slot: e.slot,
-        beat: e.contest_beats,
+        beat: e.contest_beats ? { ...e.contest_beats, signed_url: urlMap.get(e.contest_beats.audio_path) ?? "" } : undefined,
         votes: tallyMap.get(e.id) ?? 0,
       }))
     );
@@ -129,14 +129,15 @@ const BeatOfTheDay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const togglePlay = (entryId: string, path: string) => {
+  const togglePlay = (entryId: string, signedUrl: string) => {
     if (audioRef.current && playingId === entryId) {
       audioRef.current.pause();
       setPlayingId(null);
       return;
     }
     if (audioRef.current) audioRef.current.pause();
-    const a = new Audio(audioUrl(path));
+    if (!signedUrl) { toast.error("Beat unavailable"); return; }
+    const a = new Audio(signedUrl);
     audioRef.current = a;
     a.onended = () => setPlayingId(null);
     a.play().catch(() => toast.error("Could not play beat"));
@@ -272,7 +273,7 @@ const BeatOfTheDay = () => {
                 >
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => e.beat && togglePlay(e.id, e.beat.audio_path)}
+                      onClick={() => e.beat && togglePlay(e.id, e.beat.signed_url ?? "")}
                       className="h-10 w-10 grid place-items-center rounded-full bg-secondary shrink-0"
                     >
                       {playingId === e.id ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

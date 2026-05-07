@@ -100,11 +100,15 @@ const LiveApp = () => {
       nameMap = new Map((profs ?? []).map((p) => [p.id, p.artist_name]));
     }
 
+    const allPaths = [...(tracks ?? []), ...(mine ?? [])].map((t: any) => t.audio_path);
+    const { signedTrackUrls } = await import("@/lib/storage");
+    const urlMap = await signedTrackUrls(allPaths);
+
     const decorate = (rows: any[]): FeedTrack[] =>
       (rows ?? []).map((t) => ({
         ...t,
         mode: t.mode as Mode,
-        audio_url: supabase.storage.from("tracks").getPublicUrl(t.audio_path).data.publicUrl,
+        audio_url: urlMap.get(t.audio_path) ?? "",
         artist_name: nameMap.get(t.user_id),
       }));
 
