@@ -92,13 +92,14 @@ const BeatOfTheDay = () => {
       .eq("contest_id", c.id);
 
     const tallyMap = new Map((tallies ?? []).map((t: any) => [t.entry_id, t.vote_count]));
+    const urlMap = await signedTrackUrls((ents ?? []).map((e: any) => e.contest_beats?.audio_path).filter(Boolean));
     setEntries(
       (ents ?? []).map((e: any) => ({
         id: e.id,
         contest_id: e.contest_id,
         beat_id: e.beat_id,
         slot: e.slot,
-        beat: e.contest_beats,
+        beat: e.contest_beats ? { ...e.contest_beats, signed_url: urlMap.get(e.contest_beats.audio_path) ?? "" } : undefined,
         votes: tallyMap.get(e.id) ?? 0,
       }))
     );
