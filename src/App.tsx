@@ -20,6 +20,7 @@ import CrewChatRedirect from "./pages/CrewChatRedirect.tsx";
 import JudgingSessions from "./pages/JudgingSessions.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Boosts from "./pages/Boosts.tsx";
+import Moderation from "./pages/Moderation.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/crews/:crewId/chat" element={<ProtectedRoute><CrewChatRedirect /></ProtectedRoute>} />
             <Route path="/judging" element={<ProtectedRoute><JudgingSessions /></ProtectedRoute>} />
             <Route path="/boosts" element={<ProtectedRoute><Boosts /></ProtectedRoute>} />
+            <Route path="/moderation" element={<ProtectedRoute><Moderation /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>

@@ -5,14 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { purchase, type Sku } from "@/lib/billing";
 
 type Track = { id: string; title: string };
 type Boost = { track_id: string; plays_remaining: number; votes_remaining: number };
 
-const PACKS = [
-  { id: "starter", price: "$4.99", plays: 25, votes: 25, label: "Starter Boost" },
-  { id: "pro", price: "$8.99", plays: 50, votes: 50, label: "Pro Boost" },
-] as const;
+const PACKS: { id: Sku; price: string; plays: number; votes: number; label: string }[] = [
+  { id: "boost_25", price: "$4.99", plays: 25, votes: 25, label: "Starter Boost" },
+  { id: "boost_50", price: "$8.99", plays: 50, votes: 50, label: "Pro Boost" },
+];
 
 const Boosts = () => {
   const { user } = useAuth();
@@ -40,15 +41,12 @@ const Boosts = () => {
   const buy = async (pack: typeof PACKS[number]) => {
     if (!user || !picked) { toast.error("Pick a track first"); return; }
     setBuying(pack.id);
-    // Mock checkout — instant grant. Real Stripe wires in here later.
-    const { error } = await supabase.from("track_boosts").insert({
-      track_id: picked, owner_id: user.id, pack: pack.id,
-      plays_remaining: pack.plays, votes_remaining: pack.votes,
-    });
+    const ok = await purchase(pack.id, { trackId: picked });
     setBuying(null);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`${pack.label} activated · ${pack.plays} plays + ${pack.votes} votes 🚀`);
-    load();
+    if (ok) {
+      toast.success(`${pack.label} activated · ${pack.plays} plays + ${pack.votes} votes 🚀`);
+      load();
+    }
   };
 
   const totals = boosts.reduce<Record<string, { p: number; v: number }>>((acc, b) => {
@@ -135,7 +133,7 @@ const Boosts = () => {
                 </div>
               ))}
               <p className="text-center text-[10px] text-muted-foreground">
-                Mock checkout for testing. Real Stripe payments wire in next.
+                Web preview uses mock checkout. On Android, Google Play Billing handles real payments and receipts are validated server-side.
               </p>
             </div>
           </>

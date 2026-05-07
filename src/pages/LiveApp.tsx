@@ -5,6 +5,7 @@ import {
   LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
 } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
+import { ReportTrackButton } from "@/components/ReportTrackButton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -91,7 +92,7 @@ const LiveApp = () => {
       supabase.from("profiles").select("id, artist_name, avatar_url").eq("id", user.id).maybeSingle(),
       supabase.from("wallets").select("csb_balance").eq("user_id", user.id).maybeSingle(),
       supabase.from("tracks").select(trackSelect).eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("tracks").select(trackSelect).eq("is_featured", true).order("created_at", { ascending: false }).limit(10),
+      supabase.from("tracks").select(trackSelect).eq("is_featured", true).eq("is_hidden", false).order("created_at", { ascending: false }).limit(10),
       supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle(),
       (supabase as any).rpc("boosted_track_order"),
       (supabase as any).rpc("anonymous_track_score_tallies"),
@@ -101,8 +102,8 @@ const LiveApp = () => {
     const boostMap = new Map(boostRows.map((b) => [b.track_id, Number(b.boost_rank) || 0]));
     const boostedIds = boostRows.map((b) => b.track_id);
     const [{ data: boosted }, { data: chronological }] = await Promise.all([
-      boostedIds.length ? supabase.from("tracks").select(trackSelect).in("id", boostedIds) : Promise.resolve({ data: [] as any[] }),
-      supabase.from("tracks").select(trackSelect).order("created_at", { ascending: false }).limit(80),
+      boostedIds.length ? supabase.from("tracks").select(trackSelect).in("id", boostedIds).eq("is_hidden", false) : Promise.resolve({ data: [] as any[] }),
+      supabase.from("tracks").select(trackSelect).eq("is_hidden", false).order("created_at", { ascending: false }).limit(80),
     ]);
     const feedRows = [...(boosted ?? []), ...(chronological ?? []).filter((t: any) => !boostMap.has(t.id))]
       .sort((a: any, b: any) => (boostMap.get(b.id) ?? 0) - (boostMap.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at))
@@ -529,6 +530,9 @@ const TrackRow = ({
           }}
         />
       )}
+      <div className="mt-2 flex justify-end">
+        <ReportTrackButton trackId={t.id} />
+      </div>
     </div>
   );
 };

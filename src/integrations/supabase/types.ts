@@ -393,6 +393,33 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          moderator_id: string
+          notes: string | null
+          track_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          moderator_id: string
+          notes?: string | null
+          track_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          moderator_id?: string
+          notes?: string | null
+          track_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           artist_name: string
@@ -483,6 +510,39 @@ export type Database = {
         }
         Relationships: []
       }
+      track_reports: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+          track_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: string
+          track_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          track_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       track_scores: {
         Row: {
           created_at: string
@@ -532,6 +592,7 @@ export type Database = {
           duration_seconds: number
           id: string
           is_featured: boolean
+          is_hidden: boolean
           mode: string
           play_count: number
           title: string
@@ -544,6 +605,7 @@ export type Database = {
           duration_seconds?: number
           id?: string
           is_featured?: boolean
+          is_hidden?: boolean
           mode?: string
           play_count?: number
           title: string
@@ -556,6 +618,7 @@ export type Database = {
           duration_seconds?: number
           id?: string
           is_featured?: boolean
+          is_hidden?: boolean
           mode?: string
           play_count?: number
           title?: string
