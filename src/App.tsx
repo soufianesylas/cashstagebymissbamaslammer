@@ -10,6 +10,7 @@ import PitchDeck from "./pages/PitchDeck.tsx";
 import Auth from "./pages/Auth.tsx";
 import Studio from "./pages/Studio.tsx";
 import Privacy from "./pages/Privacy.tsx";
+import BeatOfTheDay from "./pages/BeatOfTheDay.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
