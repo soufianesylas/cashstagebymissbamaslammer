@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 /**
  * 30-second ad gate for free users.
- * - Tries the native AdMob rewarded ad via @capacitor-community/admob if available.
+ * - Tries the native AdMob rewarded ad through Capacitor's runtime plugin registry.
  * - Falls back to a 30s house-promo countdown modal so the flow is Play Store ready
  *   without a real ad network configured yet.
  *
@@ -22,22 +22,19 @@ let pendingResolve: (() => void) | null = null;
 export const playRewardedAd = async (): Promise<boolean> => {
   // Try native AdMob if the plugin is installed and we're on a device
   try {
-    // Use a runtime-resolved specifier so Vite/Rollup don't try to bundle the
-    // optional native plugin. Only resolves on a real device build.
-    const specifier = "@capacitor-community/admob";
+    // Do not import the optional native package in web builds; Vite would try to resolve it.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dynImport = new Function("s", "return import(s)") as (s: string) => Promise<any>;
-    const mod = await dynImport(specifier).catch(() => null);
-    if (mod?.AdMob && typeof mod.AdMob.prepareRewardVideoAd === "function") {
+    const capacitor = (window as any).Capacitor;
+    const adMob = capacitor?.Plugins?.AdMob;
+    if (adMob && typeof adMob.prepareRewardVideoAd === "function") {
       // Test ad unit IDs from Google. Replace with real IDs before production.
       const adId =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).Capacitor?.getPlatform?.() === "ios"
+        capacitor?.getPlatform?.() === "ios"
           ? "ca-app-pub-3940256099942544/1712485313"
           : "ca-app-pub-3940256099942544/5224354917";
-      await mod.AdMob.initialize({});
-      await mod.AdMob.prepareRewardVideoAd({ adId });
-      await mod.AdMob.showRewardVideoAd();
+      await adMob.initialize({});
+      await adMob.prepareRewardVideoAd({ adId });
+      await adMob.showRewardVideoAd();
       return true;
     }
   } catch {
