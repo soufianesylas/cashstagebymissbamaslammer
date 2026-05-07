@@ -207,8 +207,8 @@ const Studio = () => {
         user_id: user.id, title: baseTitle, mode, audio_path: path, duration_seconds: dur,
       });
       if (insertErr) throw insertErr;
-      toast.success("Track uploaded 🎤");
-      await loadTracks();
+      toast.success("Track uploaded 🎤 Heading to the feed…");
+      navigate(mode === "battle" ? "/app?tab=battles" : "/app?tab=feed");
     } catch (e: any) {
       toast.error(e?.message ?? "Upload failed");
     } finally {
