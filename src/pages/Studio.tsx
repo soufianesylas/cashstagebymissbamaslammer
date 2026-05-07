@@ -130,10 +130,12 @@ const Studio = () => {
       previewRef.current.pause();
       setPreviewingId(null);
     }
+    const eff: VoiceEffect = !isPaid ? "clean" : (effect === "chorus" && !isVip ? "reverb" : effect);
     await recorder.start({
       beatUrl: selectedBeat?.url ?? null,
       beatVolume,
       micVolume,
+      effect: eff,
     });
   };
 
