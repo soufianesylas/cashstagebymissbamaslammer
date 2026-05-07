@@ -529,6 +529,9 @@ const TrackRow = ({
           }}
         />
       )}
+      <div className="mt-2 flex justify-end">
+        <ReportTrackButton trackId={t.id} />
+      </div>
     </div>
   );
 };
