@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload } from "lucide-react";
+import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload, Lock, Wand2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
-import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
+
+type Tier = "free" | "platinum" | "vip";
+const EFFECTS: { id: VoiceEffect; label: string; vipOnly?: boolean }[] = [
+  { id: "clean", label: "Clean" },
+  { id: "reverb", label: "Reverb" },
+  { id: "telephone", label: "Telephone" },
+  { id: "boom", label: "Boom Bass" },
+  { id: "chorus", label: "Chorus", vipOnly: true },
+];
 
 type Mode = "solo" | "collab" | "battle";
 
@@ -41,6 +51,8 @@ const Studio = () => {
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
+  const [effect, setEffect] = useState<VoiceEffect>("clean");
 
   // Beat selection
   const [selectedBeatId, setSelectedBeatId] = useState<string | null>(null);
@@ -79,8 +91,15 @@ const Studio = () => {
 
   useEffect(() => {
     loadTracks();
+    if (user) {
+      supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle()
+        .then(({ data }) => setTier((data?.tier as Tier) ?? "free"));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  const isPaid = tier === "platinum" || tier === "vip";
+  const isVip = tier === "vip";
 
   const previewBeat = (beat: FreeBeat) => {
     if (previewingId === beat.id) {
@@ -111,10 +130,12 @@ const Studio = () => {
       previewRef.current.pause();
       setPreviewingId(null);
     }
+    const eff: VoiceEffect = !isPaid ? "clean" : (effect === "chorus" && !isVip ? "reverb" : effect);
     await recorder.start({
       beatUrl: selectedBeat?.url ?? null,
       beatVolume,
       micVolume,
+      effect: eff,
     });
   };
 
@@ -166,6 +187,7 @@ const Studio = () => {
 
   const handleUpload = async (file: File) => {
     if (!user) return;
+    if (!isPaid) { toast.error("Upload is a paid feature. Free members record in-app."); return; }
     if (!file.type.startsWith("audio/")) { toast.error("Pick an audio file"); return; }
     if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
     const baseTitle = file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "Untitled";
@@ -214,28 +236,61 @@ const Studio = () => {
           </div>
         </div>
 
-        {/* Upload an existing track */}
-        <div className="mt-8 rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-4 flex items-center justify-between gap-3">
+        {/* Upload an existing track — paid only */}
+        <div className={`mt-8 rounded-2xl border p-4 flex items-center justify-between gap-3 ${isPaid ? "border-dashed border-accent/40 bg-accent/5" : "border-border bg-secondary/40"}`}>
           <div className="min-w-0">
-            <p className="text-[10px] tracking-widest text-accent font-bold">UPLOAD A TRACK</p>
-            <p className="text-sm">Got a finished song? Drop the file straight into your stage.</p>
+            <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1">
+              {!isPaid && <Lock className="h-3 w-3" />} UPLOAD A TRACK {!isPaid && "(PAID)"}
+            </p>
+            <p className="text-sm">{isPaid ? "Got a finished song? Drop the file straight into your stage." : "Free members record in-app only. Upgrade to upload finished songs."}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">MP3 / M4A / WAV · max 25MB</p>
           </div>
-          <label className={`shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm inline-flex items-center gap-2 cursor-pointer ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            {uploading ? "UPLOADING…" : "UPLOAD"}
-            <input
-              type="file"
-              accept="audio/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleUpload(f);
-                e.target.value = "";
-              }}
-            />
-          </label>
+          {isPaid ? (
+            <label className={`shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm inline-flex items-center gap-2 cursor-pointer ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "UPLOADING…" : "UPLOAD"}
+              <input
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleUpload(f);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          ) : (
+            <Link to="/pricing" className="shrink-0 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm">UPGRADE</Link>
+          )}
         </div>
+
+        {/* Voice effects */}
+        <section className="mt-8">
+          <p className="text-xs tracking-widest text-primary font-bold flex items-center gap-1"><Wand2 className="h-3 w-3" /> VOICE FX {!isPaid && <span className="text-muted-foreground">· UPGRADE TO UNLOCK</span>}</p>
+          <div className="mt-3 grid grid-cols-3 md:grid-cols-5 gap-2">
+            {EFFECTS.map((e) => {
+              const locked = (!isPaid && e.id !== "clean") || (e.vipOnly && !isVip);
+              const active = effect === e.id;
+              return (
+                <button
+                  key={e.id}
+                  onClick={() => {
+                    if (locked) { toast.error(e.vipOnly ? "VIP only voice effect" : "Voice FX are a paid feature"); return; }
+                    setEffect(e.id);
+                  }}
+                  className={`relative p-3 rounded-xl border text-xs font-bold tracking-wider transition ${
+                    active ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border"
+                  } ${locked ? "opacity-60" : ""}`}
+                >
+                  {locked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
+                  {e.label.toUpperCase()}
+                  {e.vipOnly && <span className="block text-[8px] text-accent mt-0.5">VIP</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         {/* Free beats library */}
         <section className="mt-10">
