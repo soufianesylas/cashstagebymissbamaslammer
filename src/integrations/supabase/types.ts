@@ -450,6 +450,66 @@ export type Database = {
         }
         Relationships: []
       }
+      track_boosts: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          pack: string
+          plays_remaining: number
+          track_id: string
+          updated_at: string
+          votes_remaining: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          pack: string
+          plays_remaining?: number
+          track_id: string
+          updated_at?: string
+          votes_remaining?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          pack?: string
+          plays_remaining?: number
+          track_id?: string
+          updated_at?: string
+          votes_remaining?: number
+        }
+        Relationships: []
+      }
+      track_scores: {
+        Row: {
+          created_at: string
+          id: string
+          judge_id: string
+          score: number
+          score_date: string
+          track_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          judge_id: string
+          score: number
+          score_date?: string
+          track_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          judge_id?: string
+          score?: number
+          score_date?: string
+          track_id?: string
+        }
+        Relationships: []
+      }
       tracks: {
         Row: {
           audio_path: string
@@ -639,9 +699,19 @@ export type Database = {
           },
         ]
       }
+      track_score_tallies: {
+        Row: {
+          avg_score: number | null
+          score_count: number | null
+          track_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       close_expired_contests: { Args: never; Returns: number }
+      consume_boost_play: { Args: { _track_id: string }; Returns: undefined }
+      consume_boost_vote: { Args: { _track_id: string }; Returns: undefined }
       crew_role: {
         Args: { _crew_id: string; _user_id: string }
         Returns: string
