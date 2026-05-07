@@ -15,6 +15,8 @@ import Crews from "./pages/Crews.tsx";
 import ChatList from "./pages/ChatList.tsx";
 import ChatRoom from "./pages/ChatRoom.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import WeeklyContest from "./pages/WeeklyContest.tsx";
+import CrewChatRedirect from "./pages/CrewChatRedirect.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -41,6 +43,8 @@ const App = () => (
             <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
             <Route path="/chat/:roomId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/weekly" element={<ProtectedRoute><WeeklyContest /></ProtectedRoute>} />
+            <Route path="/crews/:crewId/chat" element={<ProtectedRoute><CrewChatRedirect /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
