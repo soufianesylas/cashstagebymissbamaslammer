@@ -14,6 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
+      contest_beats: {
+        Row: {
+          approved: boolean
+          audio_path: string
+          bpm: number | null
+          created_at: string
+          id: string
+          producer_id: string
+          title: string
+          updated_at: string
+          vibe: string | null
+        }
+        Insert: {
+          approved?: boolean
+          audio_path: string
+          bpm?: number | null
+          created_at?: string
+          id?: string
+          producer_id: string
+          title: string
+          updated_at?: string
+          vibe?: string | null
+        }
+        Update: {
+          approved?: boolean
+          audio_path?: string
+          bpm?: number | null
+          created_at?: string
+          id?: string
+          producer_id?: string
+          title?: string
+          updated_at?: string
+          vibe?: string | null
+        }
+        Relationships: []
+      }
+      contest_entries: {
+        Row: {
+          beat_id: string
+          contest_id: string
+          created_at: string
+          id: string
+          slot: number
+        }
+        Insert: {
+          beat_id: string
+          contest_id: string
+          created_at?: string
+          id?: string
+          slot: number
+        }
+        Update: {
+          beat_id?: string
+          contest_id?: string
+          created_at?: string
+          id?: string
+          slot?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_entries_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "contest_beats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_entries_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "daily_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contest_votes: {
+        Row: {
+          contest_id: string
+          created_at: string
+          entry_id: string
+          id: string
+          voter_id: string
+        }
+        Insert: {
+          contest_id: string
+          created_at?: string
+          entry_id: string
+          id?: string
+          voter_id: string
+        }
+        Update: {
+          contest_id?: string
+          created_at?: string
+          entry_id?: string
+          id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_votes_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "daily_contests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_votes_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "contest_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_votes_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "contest_vote_tallies"
+            referencedColumns: ["entry_id"]
+          },
+        ]
+      }
+      daily_contests: {
+        Row: {
+          contest_date: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          winner_beat_id: string | null
+        }
+        Insert: {
+          contest_date: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          winner_beat_id?: string | null
+        }
+        Update: {
+          contest_date?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          winner_beat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_contests_winner_beat_id_fkey"
+            columns: ["winner_beat_id"]
+            isOneToOne: false
+            referencedRelation: "contest_beats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           artist_name: string
@@ -121,7 +277,31 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contest_vote_tallies: {
+        Row: {
+          beat_id: string | null
+          contest_id: string | null
+          entry_id: string | null
+          slot: number | null
+          vote_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_entries_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "contest_beats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_entries_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "daily_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
