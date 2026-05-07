@@ -61,11 +61,13 @@ const LiveApp = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [feed, setFeed] = useState<FeedTrack[]>([]);
+  const [featured, setFeatured] = useState<FeedTrack[]>([]);
   const [myTracks, setMyTracks] = useState<FeedTrack[]>([]);
   const [leaders, setLeaders] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
 
   const handleSignOut = async () => {
     await signOut();
@@ -75,21 +77,28 @@ const LiveApp = () => {
   const loadAll = async () => {
     if (!user) return;
     setRefreshing(true);
-    const [{ data: prof }, { data: wal }, { data: tracks }, { data: mine }] = await Promise.all([
+    const [{ data: prof }, { data: wal }, { data: tracks }, { data: mine }, { data: feat }, { data: sub }] = await Promise.all([
       supabase.from("profiles").select("id, artist_name, avatar_url").eq("id", user.id).maybeSingle(),
       supabase.from("wallets").select("csb_balance").eq("user_id", user.id).maybeSingle(),
       supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
         .order("play_count", { ascending: false })
         .limit(50),
       supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
+      supabase.from("tracks")
+        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle(),
     ]);
 
     setProfile(prof ?? null);
     setBalance(wal?.csb_balance ?? 0);
+    setTier(((sub?.tier as Tier) ?? "free"));
 
     // Build artist name lookup
     const ids = Array.from(new Set((tracks ?? []).map((t) => t.user_id)));
