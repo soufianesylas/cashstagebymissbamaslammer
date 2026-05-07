@@ -32,6 +32,7 @@ const App = () => (
             <Route path="/mockup" element={<AppMockup />} />
             <Route path="/pitch" element={<PitchDeck />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/beat-of-the-day" element={<ProtectedRoute><BeatOfTheDay /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
