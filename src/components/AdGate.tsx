@@ -22,9 +22,12 @@ let pendingResolve: (() => void) | null = null;
 export const playRewardedAd = async (): Promise<boolean> => {
   // Try native AdMob if the plugin is installed and we're on a device
   try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - optional dependency, may not be installed in dev
-    const mod = await import(/* @vite-ignore */ "@capacitor-community/admob").catch(() => null);
+    // Use a runtime-resolved specifier so Vite/Rollup don't try to bundle the
+    // optional native plugin. Only resolves on a real device build.
+    const specifier = "@capacitor-community/admob";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dynImport = new Function("s", "return import(s)") as (s: string) => Promise<any>;
+    const mod = await dynImport(specifier).catch(() => null);
     if (mod?.AdMob && typeof mod.AdMob.prepareRewardVideoAd === "function") {
       // Test ad unit IDs from Google. Replace with real IDs before production.
       const adId =
