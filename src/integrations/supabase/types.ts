@@ -724,6 +724,24 @@ export type Database = {
       }
     }
     Functions: {
+      anonymous_track_score_tallies: {
+        Args: never
+        Returns: {
+          average_score: number
+          feature_worthy_count: number
+          score_count: number
+          track_id: string
+        }[]
+      }
+      boosted_track_order: {
+        Args: never
+        Returns: {
+          boost_rank: number
+          boosted_plays_remaining: number
+          boosted_votes_remaining: number
+          track_id: string
+        }[]
+      }
       close_expired_contests: { Args: never; Returns: number }
       consume_boost_play: { Args: { _track_id: string }; Returns: undefined }
       consume_boost_vote: { Args: { _track_id: string }; Returns: undefined }
