@@ -91,7 +91,7 @@ const LiveApp = () => {
       supabase.from("profiles").select("id, artist_name, avatar_url").eq("id", user.id).maybeSingle(),
       supabase.from("wallets").select("csb_balance").eq("user_id", user.id).maybeSingle(),
       supabase.from("tracks").select(trackSelect).eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("tracks").select(trackSelect).eq("is_featured", true).order("created_at", { ascending: false }).limit(10),
+      supabase.from("tracks").select(trackSelect).eq("is_featured", true).eq("is_hidden", false).order("created_at", { ascending: false }).limit(10),
       supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle(),
       (supabase as any).rpc("boosted_track_order"),
       (supabase as any).rpc("anonymous_track_score_tallies"),
