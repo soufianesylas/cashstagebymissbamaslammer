@@ -9,7 +9,7 @@ interface UseRecorderResult {
   audioBlob: Blob | null;
   audioUrl: string | null;
   error: string | null;
-  start: () => Promise<void>;
+  start: (opts?: { beatUrl?: string | null; beatVolume?: number; micVolume?: number }) => Promise<void>;
   pause: () => void;
   resume: () => void;
   stop: () => void;
@@ -31,6 +31,7 @@ export const useAudioRecorder = (): UseRecorderResult => {
   const chunksRef = useRef<BlobPart[]>([]);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const beatAudioRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const accumulatedRef = useRef<number>(0);
@@ -59,6 +60,11 @@ export const useAudioRecorder = (): UseRecorderResult => {
     tickRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (beatAudioRef.current) {
+      beatAudioRef.current.pause();
+      beatAudioRef.current.src = "";
+      beatAudioRef.current = null;
+    }
     audioCtxRef.current?.close().catch(() => {});
     audioCtxRef.current = null;
     analyserRef.current = null;
@@ -66,7 +72,7 @@ export const useAudioRecorder = (): UseRecorderResult => {
 
   useEffect(() => () => cleanup(), []);
 
-  const start = async () => {
+  const start: UseRecorderResult["start"] = async (opts) => {
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -74,13 +80,51 @@ export const useAudioRecorder = (): UseRecorderResult => {
       });
       streamRef.current = stream;
 
+      const ctx = new AudioContext();
+      audioCtxRef.current = ctx;
+
+      const micSource = ctx.createMediaStreamSource(stream);
+      const micGain = ctx.createGain();
+      micGain.gain.value = opts?.micVolume ?? 1;
+      micSource.connect(micGain);
+
+      const dest = ctx.createMediaStreamDestination();
+      micGain.connect(dest);
+
+      // Analyser hears the mix
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      micGain.connect(analyser);
+
+      // Optional beat layer
+      if (opts?.beatUrl) {
+        const beatEl = new Audio();
+        beatEl.crossOrigin = "anonymous";
+        beatEl.src = opts.beatUrl;
+        beatEl.loop = true;
+        beatEl.preload = "auto";
+        beatAudioRef.current = beatEl;
+
+        const beatSource = ctx.createMediaElementSource(beatEl);
+        const beatGain = ctx.createGain();
+        beatGain.gain.value = opts?.beatVolume ?? 0.7;
+        beatSource.connect(beatGain);
+        beatGain.connect(dest);
+        beatGain.connect(ctx.destination); // user hears the beat
+        beatGain.connect(analyser);
+
+        await beatEl.play().catch(() => {});
+      }
+
+      analyserRef.current = analyser;
+
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
         : "audio/mp4";
 
-      const recorder = new MediaRecorder(stream, { mimeType });
+      const recorder = new MediaRecorder(dest.stream, { mimeType });
       chunksRef.current = [];
       recorder.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       recorder.onstop = () => {
@@ -91,14 +135,6 @@ export const useAudioRecorder = (): UseRecorderResult => {
       recorder.start(250);
       recorderRef.current = recorder;
 
-      // Audio analyser for visualisation
-      const ctx = new AudioContext();
-      const source = ctx.createMediaStreamSource(stream);
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
-      audioCtxRef.current = ctx;
-      analyserRef.current = analyser;
       rafRef.current = requestAnimationFrame(tickLevels);
 
       startTimeRef.current = Date.now();
@@ -117,6 +153,7 @@ export const useAudioRecorder = (): UseRecorderResult => {
   const pause = () => {
     if (recorderRef.current?.state === "recording") {
       recorderRef.current.pause();
+      beatAudioRef.current?.pause();
       accumulatedRef.current += (Date.now() - startTimeRef.current) / 1000;
       if (tickRef.current) window.clearInterval(tickRef.current);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -127,6 +164,7 @@ export const useAudioRecorder = (): UseRecorderResult => {
   const resume = () => {
     if (recorderRef.current?.state === "paused") {
       recorderRef.current.resume();
+      beatAudioRef.current?.play().catch(() => {});
       startTimeRef.current = Date.now();
       tickRef.current = window.setInterval(() => {
         setElapsed(accumulatedRef.current + (Date.now() - startTimeRef.current) / 1000);
