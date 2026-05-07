@@ -41,15 +41,12 @@ const Boosts = () => {
   const buy = async (pack: typeof PACKS[number]) => {
     if (!user || !picked) { toast.error("Pick a track first"); return; }
     setBuying(pack.id);
-    // Mock checkout — instant grant. Real Stripe wires in here later.
-    const { error } = await supabase.from("track_boosts").insert({
-      track_id: picked, owner_id: user.id, pack: pack.id,
-      plays_remaining: pack.plays, votes_remaining: pack.votes,
-    });
+    const ok = await purchase(pack.id, { trackId: picked });
     setBuying(null);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`${pack.label} activated · ${pack.plays} plays + ${pack.votes} votes 🚀`);
-    load();
+    if (ok) {
+      toast.success(`${pack.label} activated · ${pack.plays} plays + ${pack.votes} votes 🚀`);
+      load();
+    }
   };
 
   const totals = boosts.reduce<Record<string, { p: number; v: number }>>((acc, b) => {
