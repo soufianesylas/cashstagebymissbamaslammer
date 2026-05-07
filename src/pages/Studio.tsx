@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload, Lock, Wand2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
