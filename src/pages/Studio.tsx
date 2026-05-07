@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload } from "lucide-react";
+import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload, Lock, Wand2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
-import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
+
+type Tier = "free" | "platinum" | "vip";
+const EFFECTS: { id: VoiceEffect; label: string; vipOnly?: boolean }[] = [
+  { id: "clean", label: "Clean" },
+  { id: "reverb", label: "Reverb" },
+  { id: "telephone", label: "Telephone" },
+  { id: "boom", label: "Boom Bass" },
+  { id: "chorus", label: "Chorus", vipOnly: true },
+];
 
 type Mode = "solo" | "collab" | "battle";
 
@@ -41,6 +51,8 @@ const Studio = () => {
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
+  const [effect, setEffect] = useState<VoiceEffect>("clean");
 
   // Beat selection
   const [selectedBeatId, setSelectedBeatId] = useState<string | null>(null);
