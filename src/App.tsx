@@ -11,6 +11,9 @@ import Auth from "./pages/Auth.tsx";
 import Studio from "./pages/Studio.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import BeatOfTheDay from "./pages/BeatOfTheDay.tsx";
+import Crews from "./pages/Crews.tsx";
+import ChatList from "./pages/ChatList.tsx";
+import ChatRoom from "./pages/ChatRoom.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,6 +36,9 @@ const App = () => (
             <Route path="/pitch" element={<PitchDeck />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/beat-of-the-day" element={<ProtectedRoute><BeatOfTheDay /></ProtectedRoute>} />
+            <Route path="/crews" element={<ProtectedRoute><Crews /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
+            <Route path="/chat/:roomId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
