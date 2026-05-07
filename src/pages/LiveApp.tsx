@@ -204,15 +204,6 @@ const LiveApp = () => {
     }
   };
 
-  const legacyCountPlay = async (track: FeedTrack) => {
-    if (track.user_id !== user?.id) {
-      const { error } = await supabase.rpc("increment_play_count", { _track_id: track.id });
-      if (!error) {
-        setFeed((cur) => cur.map((t) => t.id === track.id ? { ...t, play_count: t.play_count + 1 } : t));
-      }
-    }
-  };
-
   const rollTheDice = () => {
     const modes: Mode[] = ["solo", "collab", "battle"];
     const pick = modes[Math.floor(Math.random() * modes.length)];
@@ -341,7 +332,7 @@ const LiveApp = () => {
             </div>
           )}
           {tab === "feed" && (
-            <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} />
+            <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} onMinuteListened={countValidPlay} />
           )}
           {tab === "studio" && (
             <StudioTab myTracks={myTracks} playingId={playingId} onPlay={handlePlay} onOpenStudio={() => navigate("/studio")} />
@@ -403,13 +394,13 @@ const Stat = ({ label, value, sub }: { label: string; value: string; sub: string
   </div>
 );
 
-const FeedTab = ({ tracks, featured, playingId, onPlay }: { tracks: FeedTrack[]; featured: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; }) => (
+const FeedTab = ({ tracks, featured, playingId, onPlay, onMinuteListened }: { tracks: FeedTrack[]; featured: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; onMinuteListened: (t: FeedTrack) => void; }) => (
   <div className="space-y-3">
     {featured.length > 0 && (
       <>
         <h2 className="font-display text-2xl flex items-center gap-2"><Star className="h-5 w-5 text-accent" /> Featured Tracks</h2>
         {featured.map((t) => (
-          <TrackRow key={`f-${t.id}`} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} showArtist />
+          <TrackRow key={`f-${t.id}`} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} onMinuteListened={() => onMinuteListened(t)} showArtist />
         ))}
       </>
     )}
@@ -417,7 +408,7 @@ const FeedTab = ({ tracks, featured, playingId, onPlay }: { tracks: FeedTrack[];
     {tracks.length === 0 ? (
       <Empty icon={Flame} title="NO TRACKS YET" sub="Be the first to drop one in the studio." />
     ) : tracks.map((t) => (
-      <TrackRow key={t.id} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} showArtist />
+      <TrackRow key={t.id} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} onMinuteListened={() => onMinuteListened(t)} showArtist />
     ))}
   </div>
 );
