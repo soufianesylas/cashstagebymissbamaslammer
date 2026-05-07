@@ -133,7 +133,7 @@ const Boosts = () => {
                 </div>
               ))}
               <p className="text-center text-[10px] text-muted-foreground">
-                Mock checkout for testing. Real Stripe payments wire in next.
+                Web preview uses mock checkout. On Android, Google Play Billing handles real payments and receipts are validated server-side.
               </p>
             </div>
           </>
