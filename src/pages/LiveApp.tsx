@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Swords, Music, Users, Wallet, Mic, Play, Pause, Loader2,
-  LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw,
+  LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
 } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { gateAd, type Tier } from "@/components/AdGate";
 
 type Tab = "home" | "feed" | "studio" | "leaderboard" | "wallet";
 type Mode = "solo" | "collab" | "battle";
@@ -23,6 +24,7 @@ interface FeedTrack {
   user_id: string;
   audio_url: string;
   artist_name?: string;
+  is_featured?: boolean;
 }
 
 interface Profile {
