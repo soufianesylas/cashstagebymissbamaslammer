@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2 } from "lucide-react";
+import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
@@ -40,6 +40,7 @@ const Studio = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Beat selection
   const [selectedBeatId, setSelectedBeatId] = useState<string | null>(null);
@@ -163,7 +164,35 @@ const Studio = () => {
     }
   };
 
-  const isRecording = recorder.state === "recording";
+  const handleUpload = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("audio/")) { toast.error("Pick an audio file"); return; }
+    if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
+    const baseTitle = file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "Untitled";
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "mp3").toLowerCase();
+      const path = `${user.id}/${Date.now()}-${baseTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("tracks").upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      // get duration
+      const dur = await new Promise<number>((res) => {
+        const a = new Audio(URL.createObjectURL(file));
+        a.onloadedmetadata = () => res(Math.round(a.duration || 0));
+        a.onerror = () => res(0);
+      });
+      const { error: insertErr } = await supabase.from("tracks").insert({
+        user_id: user.id, title: baseTitle, mode, audio_path: path, duration_seconds: dur,
+      });
+      if (insertErr) throw insertErr;
+      toast.success("Track uploaded 🎤");
+      await loadTracks();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
   const isPaused = recorder.state === "paused";
   const hasRecording = recorder.state === "stopped" && recorder.audioBlob;
   const canPickBeat = recorder.state === "idle";
