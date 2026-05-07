@@ -91,8 +91,15 @@ const Studio = () => {
 
   useEffect(() => {
     loadTracks();
+    if (user) {
+      supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle()
+        .then(({ data }) => setTier((data?.tier as Tier) ?? "free"));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  const isPaid = tier === "platinum" || tier === "vip";
+  const isVip = tier === "vip";
 
   const previewBeat = (beat: FreeBeat) => {
     if (previewingId === beat.id) {
