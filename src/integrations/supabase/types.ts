@@ -275,6 +275,90 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_contest_entries: {
+        Row: {
+          contest_id: string
+          created_at: string
+          id: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          contest_id: string
+          created_at?: string
+          id?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          contest_id?: string
+          created_at?: string
+          id?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_entries_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_contest_entries_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_contests: {
+        Row: {
+          created_at: string
+          id: string
+          payout_status: string
+          prize_usd_cents: number
+          status: string
+          submissions_close_at: string
+          submissions_open_at: string
+          updated_at: string
+          voting_close_at: string
+          voting_open_at: string
+          week_start: string
+          winner_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payout_status?: string
+          prize_usd_cents?: number
+          status?: string
+          submissions_close_at: string
+          submissions_open_at: string
+          updated_at?: string
+          voting_close_at: string
+          voting_open_at: string
+          week_start: string
+          winner_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payout_status?: string
+          prize_usd_cents?: number
+          status?: string
+          submissions_close_at?: string
+          submissions_open_at?: string
+          updated_at?: string
+          voting_close_at?: string
+          voting_open_at?: string
+          week_start?: string
+          winner_user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       contest_vote_tallies: {
@@ -304,6 +388,7 @@ export type Database = {
       }
     }
     Functions: {
+      close_expired_contests: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -312,6 +397,7 @@ export type Database = {
         Returns: boolean
       }
       increment_play_count: { Args: { _track_id: string }; Returns: undefined }
+      open_todays_contest: { Args: never; Returns: string }
     }
     Enums: {
       app_role: "admin" | "moderator" | "artist"
