@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/crews/:crewId/chat" element={<ProtectedRoute><CrewChatRedirect /></ProtectedRoute>} />
             <Route path="/judging" element={<ProtectedRoute><JudgingSessions /></ProtectedRoute>} />
             <Route path="/boosts" element={<ProtectedRoute><Boosts /></ProtectedRoute>} />
+            <Route path="/moderation" element={<ProtectedRoute><Moderation /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>
