@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          room_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          room_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chatrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatrooms: {
+        Row: {
+          created_at: string
+          crew_id: string | null
+          id: string
+          kind: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          crew_id?: string | null
+          id?: string
+          kind: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          crew_id?: string | null
+          id?: string
+          kind?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatrooms_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: true
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contest_beats: {
         Row: {
           approved: boolean
@@ -134,6 +198,68 @@ export type Database = {
             referencedColumns: ["entry_id"]
           },
         ]
+      }
+      crew_members: {
+        Row: {
+          crew_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          crew_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          crew_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_members_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crews: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          leader_id: string
+          name: string
+          tag: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          leader_id: string
+          name: string
+          tag: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          leader_id?: string
+          name?: string
+          tag?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       daily_contests: {
         Row: {
@@ -389,6 +515,10 @@ export type Database = {
     }
     Functions: {
       close_expired_contests: { Args: never; Returns: number }
+      crew_role: {
+        Args: { _crew_id: string; _user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -397,6 +527,10 @@ export type Database = {
         Returns: boolean
       }
       increment_play_count: { Args: { _track_id: string }; Returns: undefined }
+      is_crew_member: {
+        Args: { _crew_id: string; _user_id: string }
+        Returns: boolean
+      }
       open_todays_contest: { Args: never; Returns: string }
     }
     Enums: {
