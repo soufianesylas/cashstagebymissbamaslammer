@@ -299,10 +299,14 @@ const LiveApp = () => {
                 <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
                 <p className="font-display text-lg mt-1">OPEN ROOMS</p>
               </button>
+              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent col-span-2">
+                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
+                <p className="font-display text-lg mt-1">SCORE 1–10 (INVITE ONLY)</p>
+              </button>
             </div>
           )}
           {tab === "feed" && (
-            <FeedTab tracks={feed} playingId={playingId} onPlay={handlePlay} />
+            <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} />
           )}
           {tab === "studio" && (
             <StudioTab myTracks={myTracks} playingId={playingId} onPlay={handlePlay} onOpenStudio={() => navigate("/studio")} />
