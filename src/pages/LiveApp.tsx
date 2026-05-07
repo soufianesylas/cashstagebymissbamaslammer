@@ -286,8 +286,6 @@ const LiveApp = () => {
               </button>
             </div>
           )}
-          {false && (
-            <div />
           {tab === "feed" && (
             <FeedTab tracks={feed} playingId={playingId} onPlay={handlePlay} />
           )}
