@@ -1,1 +1,4 @@
 project_id = "hgnpriwaczmwnfgdjprr"
+
+[functions.verify-purchase]
+verify_jwt = true
