@@ -129,14 +129,15 @@ const BeatOfTheDay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const togglePlay = (entryId: string, path: string) => {
+  const togglePlay = (entryId: string, signedUrl: string) => {
     if (audioRef.current && playingId === entryId) {
       audioRef.current.pause();
       setPlayingId(null);
       return;
     }
     if (audioRef.current) audioRef.current.pause();
-    const a = new Audio(audioUrl(path));
+    if (!signedUrl) { toast.error("Beat unavailable"); return; }
+    const a = new Audio(signedUrl);
     audioRef.current = a;
     a.onended = () => setPlayingId(null);
     a.play().catch(() => toast.error("Could not play beat"));
