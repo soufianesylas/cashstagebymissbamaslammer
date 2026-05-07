@@ -20,6 +20,7 @@ import CrewChatRedirect from "./pages/CrewChatRedirect.tsx";
 import JudgingSessions from "./pages/JudgingSessions.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Boosts from "./pages/Boosts.tsx";
+import Moderation from "./pages/Moderation.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
