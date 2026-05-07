@@ -266,6 +266,28 @@ const LiveApp = () => {
               onGoStudio={() => navigate("/studio")}
             />
           )}
+          {tab === "home" && (
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <button onClick={() => navigate("/weekly")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
+                <p className="text-[10px] tracking-widest text-primary font-bold">WEEKLY CONTEST</p>
+                <p className="font-display text-lg mt-1">$500 PRIZE</p>
+              </button>
+              <button onClick={() => navigate("/beat-of-the-day")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
+                <p className="text-[10px] tracking-widest text-accent font-bold">BEAT OF THE DAY</p>
+                <p className="font-display text-lg mt-1">VOTE NOW</p>
+              </button>
+              <button onClick={() => navigate("/crews")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
+                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CREWS</p>
+                <p className="font-display text-lg mt-1">JOIN ONE</p>
+              </button>
+              <button onClick={() => navigate("/chat")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
+                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
+                <p className="font-display text-lg mt-1">OPEN ROOMS</p>
+              </button>
+            </div>
+          )}
+          {false && (
+            <div />
           {tab === "feed" && (
             <FeedTab tracks={feed} playingId={playingId} onPlay={handlePlay} />
           )}
