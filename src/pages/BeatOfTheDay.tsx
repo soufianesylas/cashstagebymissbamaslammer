@@ -45,8 +45,7 @@ const useCountdown = (target: Date) => {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
 
-const audioUrl = (path: string) =>
-  supabase.storage.from("tracks").getPublicUrl(path).data.publicUrl;
+import { signedTrackUrls } from "@/lib/storage";
 
 const BeatOfTheDay = () => {
   const { user } = useAuth();
