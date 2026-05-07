@@ -101,8 +101,8 @@ const LiveApp = () => {
     const boostMap = new Map(boostRows.map((b) => [b.track_id, Number(b.boost_rank) || 0]));
     const boostedIds = boostRows.map((b) => b.track_id);
     const [{ data: boosted }, { data: chronological }] = await Promise.all([
-      boostedIds.length ? supabase.from("tracks").select(trackSelect).in("id", boostedIds) : Promise.resolve({ data: [] as any[] }),
-      supabase.from("tracks").select(trackSelect).order("created_at", { ascending: false }).limit(80),
+      boostedIds.length ? supabase.from("tracks").select(trackSelect).in("id", boostedIds).eq("is_hidden", false) : Promise.resolve({ data: [] as any[] }),
+      supabase.from("tracks").select(trackSelect).eq("is_hidden", false).order("created_at", { ascending: false }).limit(80),
     ]);
     const feedRows = [...(boosted ?? []), ...(chronological ?? []).filter((t: any) => !boostMap.has(t.id))]
       .sort((a: any, b: any) => (boostMap.get(b.id) ?? 0) - (boostMap.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at))
