@@ -273,7 +273,7 @@ const BeatOfTheDay = () => {
                 >
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => e.beat && togglePlay(e.id, e.beat.audio_path)}
+                      onClick={() => e.beat && togglePlay(e.id, e.beat.signed_url ?? "")}
                       className="h-10 w-10 grid place-items-center rounded-full bg-secondary shrink-0"
                     >
                       {playingId === e.id ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
