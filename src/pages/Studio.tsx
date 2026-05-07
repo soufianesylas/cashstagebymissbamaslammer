@@ -164,10 +164,10 @@ const Studio = () => {
       });
       if (insertErr) throw insertErr;
 
-      toast.success("Track saved to your stage 🔥");
+      toast.success("Track saved 🔥 Heading to the feed…");
       setTitle("");
       recorder.reset();
-      await loadTracks();
+      navigate(mode === "battle" ? "/app?tab=battles" : "/app?tab=feed");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not save track");
     } finally {
