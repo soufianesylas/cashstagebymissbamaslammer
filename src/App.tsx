@@ -40,6 +40,7 @@ const App = () => (
             <Route path="/crews" element={<ProtectedRoute><Crews /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
             <Route path="/chat/:roomId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
