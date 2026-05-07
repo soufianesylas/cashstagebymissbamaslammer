@@ -6,7 +6,9 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const isProd = process.env.CAP_ENV === 'prod';
 
 const config: CapacitorConfig = {
-  appId: 'app.cashstage.miss',
+  // ⚠️ IMPORTANT: appId is PERMANENT once published to Play Store.
+  // Change to your own reverse-domain (e.g. 'com.cashstage.app') BEFORE first upload.
+  appId: 'app.lovable.8f53de131f084dcca2c86d7b6633dbe8',
   appName: 'Cash Stage',
   webDir: 'dist',
   ...(isProd
