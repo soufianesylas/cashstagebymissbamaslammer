@@ -8,6 +8,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { gateAd } from "@/components/AdGate";
 
 type Tier = "free" | "platinum" | "vip";
 type Contest = {
@@ -100,6 +101,7 @@ const WeeklyContest = () => {
   const submit = async () => {
     if (!submitFor || !pickedTrack || !user) return;
     setSubmitting(true);
+    try { await gateAd(tier); } catch { /* noop */ }
     const { error } = await supabase.from("weekly_contest_entries").insert({
       contest_id: submitFor.id, user_id: user.id, track_id: pickedTrack,
     });
