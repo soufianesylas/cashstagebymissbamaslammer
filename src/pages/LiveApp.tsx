@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Swords, Music, Users, Wallet, Mic, Play, Pause, Loader2,
@@ -76,6 +76,7 @@ const LiveApp = () => {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [tier, setTier] = useState<Tier>("free");
+  const countedPlayRef = useRef<Set<string>>(new Set());
 
   const handleSignOut = async () => {
     await signOut();
@@ -85,75 +86,79 @@ const LiveApp = () => {
   const loadAll = async () => {
     if (!user) return;
     setRefreshing(true);
-    const [{ data: prof }, { data: wal }, { data: tracks }, { data: mine }, { data: feat }, { data: sub }] = await Promise.all([
+    const trackSelect = "id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured";
+    const [{ data: prof }, { data: wal }, { data: mine }, { data: feat }, { data: sub }, boostResult, tallyResult] = await Promise.all([
       supabase.from("profiles").select("id, artist_name, avatar_url").eq("id", user.id).maybeSingle(),
       supabase.from("wallets").select("csb_balance").eq("user_id", user.id).maybeSingle(),
-      supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
-        .order("play_count", { ascending: false })
-        .limit(50),
-      supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase.from("tracks")
-        .select("id, title, mode, audio_path, duration_seconds, play_count, created_at, user_id, is_featured")
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
-        .limit(10),
+      supabase.from("tracks").select(trackSelect).eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("tracks").select(trackSelect).eq("is_featured", true).order("created_at", { ascending: false }).limit(10),
       supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle(),
+      (supabase as any).rpc("boosted_track_order"),
+      (supabase as any).rpc("anonymous_track_score_tallies"),
     ]);
+
+    const boostRows = (boostResult?.data ?? []) as { track_id: string; boost_rank: number }[];
+    const boostMap = new Map(boostRows.map((b) => [b.track_id, Number(b.boost_rank) || 0]));
+    const boostedIds = boostRows.map((b) => b.track_id);
+    const [{ data: boosted }, { data: chronological }] = await Promise.all([
+      boostedIds.length ? supabase.from("tracks").select(trackSelect).in("id", boostedIds) : Promise.resolve({ data: [] as any[] }),
+      supabase.from("tracks").select(trackSelect).order("created_at", { ascending: false }).limit(80),
+    ]);
+    const feedRows = [...(boosted ?? []), ...(chronological ?? []).filter((t: any) => !boostMap.has(t.id))]
+      .sort((a: any, b: any) => (boostMap.get(b.id) ?? 0) - (boostMap.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at))
+      .slice(0, 80);
+
+    const tallies = (tallyResult?.data ?? []) as { track_id: string; score_count: number; average_score: number; feature_worthy_count: number }[];
+    let tallyTracks: { id: string; title: string; user_id: string }[] = [];
+    if (tallies.length) {
+      const { data } = await supabase.from("tracks").select("id, title, user_id").in("id", tallies.map((t) => t.track_id));
+      tallyTracks = data ?? [];
+    }
 
     setProfile(prof ?? null);
     setBalance(wal?.csb_balance ?? 0);
     setTier(((sub?.tier as Tier) ?? "free"));
 
-    // Build artist name lookup
-    const ids = Array.from(new Set((tracks ?? []).map((t) => t.user_id)));
+    const ids = Array.from(new Set([...feedRows, ...(mine ?? []), ...(feat ?? []), ...tallyTracks].map((t: any) => t.user_id).filter(Boolean)));
     let nameMap = new Map<string, string>();
     if (ids.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, artist_name")
-        .in("id", ids);
+      const { data: profs } = await supabase.from("profiles").select("id, artist_name").in("id", ids);
       nameMap = new Map((profs ?? []).map((p) => [p.id, p.artist_name]));
     }
 
-    const allPaths = [...(tracks ?? []), ...(mine ?? []), ...(feat ?? [])].map((t: any) => t.audio_path);
+    const allPaths = [...feedRows, ...(mine ?? []), ...(feat ?? [])].map((t: any) => t.audio_path);
     const { signedTrackUrls } = await import("@/lib/storage");
     const urlMap = await signedTrackUrls(allPaths);
+    const decorate = (rows: any[]): FeedTrack[] => (rows ?? []).map((t) => ({
+      ...t,
+      mode: t.mode as Mode,
+      audio_url: urlMap.get(t.audio_path) ?? "",
+      artist_name: nameMap.get(t.user_id),
+      is_boosted: (boostMap.get(t.id) ?? 0) > 0,
+      boost_rank: boostMap.get(t.id) ?? 0,
+    }));
 
-    const decorate = (rows: any[]): FeedTrack[] =>
-      (rows ?? []).map((t) => ({
-        ...t,
-        mode: t.mode as Mode,
-        audio_url: urlMap.get(t.audio_path) ?? "",
-        artist_name: nameMap.get(t.user_id),
-      }));
-
-    setFeed(decorate(tracks ?? []));
+    setFeed(decorate(feedRows));
     setMyTracks(decorate(mine ?? []));
     setFeatured(decorate(feat ?? []));
 
-    // Compute leaderboard from feed (top artists by total plays)
-    const agg = new Map<string, { plays: number; count: number }>();
-    (tracks ?? []).forEach((t: any) => {
-      const cur = agg.get(t.user_id) ?? { plays: 0, count: 0 };
-      cur.plays += t.play_count ?? 0;
-      cur.count += 1;
-      agg.set(t.user_id, cur);
-    });
-    const board: LeaderRow[] = Array.from(agg.entries())
-      .map(([id, v]) => ({
-        id,
-        artist_name: nameMap.get(id) ?? "Unknown Artist",
-        avatar_url: null,
-        total_plays: v.plays,
-        track_count: v.count,
-      }))
-      .sort((a, b) => b.total_plays - a.total_plays)
-      .slice(0, 25);
-    setLeaders(board);
+    const trackMap = new Map(tallyTracks.map((t) => [t.id, t]));
+    setLeaders(tallies
+      .map((row) => {
+        const track = trackMap.get(row.track_id);
+        if (!track) return null;
+        return {
+          track_id: row.track_id,
+          title: track.title,
+          artist_name: nameMap.get(track.user_id) ?? "Unknown Artist",
+          score_count: Number(row.score_count) || 0,
+          average_score: Number(row.average_score) || 0,
+          feature_worthy_count: Number(row.feature_worthy_count) || 0,
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => b.average_score - a.average_score || b.score_count - a.score_count)
+      .slice(0, 25) as LeaderRow[]);
 
     setLoading(false);
     setRefreshing(false);
