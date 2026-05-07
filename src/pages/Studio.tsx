@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Mic, Square, Play, Pause, Trash2, Save, Users, Swords, Music, ShieldOff, Loader2, Headphones, Volume2, Upload, Lock, Wand2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SiteNav from "@/components/SiteNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
@@ -43,6 +43,7 @@ const modeMeta: Record<Mode, { label: string; Icon: typeof Mic; color: string }>
 
 const Studio = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const recorder = useAudioRecorder();
   const [title, setTitle] = useState("");
   const [mode, setMode] = useState<Mode>("solo");
@@ -163,10 +164,10 @@ const Studio = () => {
       });
       if (insertErr) throw insertErr;
 
-      toast.success("Track saved to your stage 🔥");
+      toast.success("Track saved 🔥 Heading to the feed…");
       setTitle("");
       recorder.reset();
-      await loadTracks();
+      navigate(mode === "battle" ? "/app?tab=battles" : "/app?tab=feed");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not save track");
     } finally {
@@ -206,8 +207,8 @@ const Studio = () => {
         user_id: user.id, title: baseTitle, mode, audio_path: path, duration_seconds: dur,
       });
       if (insertErr) throw insertErr;
-      toast.success("Track uploaded 🎤");
-      await loadTracks();
+      toast.success("Track uploaded 🎤 Heading to the feed…");
+      navigate(mode === "battle" ? "/app?tab=battles" : "/app?tab=feed");
     } catch (e: any) {
       toast.error(e?.message ?? "Upload failed");
     } finally {
