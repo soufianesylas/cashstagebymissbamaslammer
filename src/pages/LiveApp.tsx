@@ -368,8 +368,16 @@ const Stat = ({ label, value, sub }: { label: string; value: string; sub: string
   </div>
 );
 
-const FeedTab = ({ tracks, playingId, onPlay }: { tracks: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; }) => (
+const FeedTab = ({ tracks, featured, playingId, onPlay }: { tracks: FeedTrack[]; featured: FeedTrack[]; playingId: string | null; onPlay: (t: FeedTrack) => void; }) => (
   <div className="space-y-3">
+    {featured.length > 0 && (
+      <>
+        <h2 className="font-display text-2xl flex items-center gap-2"><Star className="h-5 w-5 text-accent" /> Featured Tracks</h2>
+        {featured.map((t) => (
+          <TrackRow key={`f-${t.id}`} t={t} isPlaying={playingId === t.id} onPlay={() => onPlay(t)} showArtist />
+        ))}
+      </>
+    )}
     <h2 className="font-display text-2xl">🔥 Trending Drops</h2>
     {tracks.length === 0 ? (
       <Empty icon={Flame} title="NO TRACKS YET" sub="Be the first to drop one in the studio." />
