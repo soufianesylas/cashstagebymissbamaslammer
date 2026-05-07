@@ -187,7 +187,6 @@ const Studio = () => {
 
   const handleUpload = async (file: File) => {
     if (!user) return;
-    if (!isPaid) { toast.error("Upload is a paid feature. Free members record in-app."); return; }
     if (!file.type.startsWith("audio/")) { toast.error("Pick an audio file"); return; }
     if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
     const baseTitle = file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "Untitled";
