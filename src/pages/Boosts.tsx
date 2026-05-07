@@ -5,14 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { purchase, type Sku } from "@/lib/billing";
 
 type Track = { id: string; title: string };
 type Boost = { track_id: string; plays_remaining: number; votes_remaining: number };
 
-const PACKS = [
-  { id: "starter", price: "$4.99", plays: 25, votes: 25, label: "Starter Boost" },
-  { id: "pro", price: "$8.99", plays: 50, votes: 50, label: "Pro Boost" },
-] as const;
+const PACKS: { id: Sku; price: string; plays: number; votes: number; label: string }[] = [
+  { id: "boost_25", price: "$4.99", plays: 25, votes: 25, label: "Starter Boost" },
+  { id: "boost_50", price: "$8.99", plays: 50, votes: 50, label: "Pro Boost" },
+];
 
 const Boosts = () => {
   const { user } = useAuth();
