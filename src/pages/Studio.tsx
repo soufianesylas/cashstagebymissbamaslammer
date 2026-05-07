@@ -43,6 +43,7 @@ const modeMeta: Record<Mode, { label: string; Icon: typeof Mic; color: string }>
 
 const Studio = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const recorder = useAudioRecorder();
   const [title, setTitle] = useState("");
   const [mode, setMode] = useState<Mode>("solo");
