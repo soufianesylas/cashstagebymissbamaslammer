@@ -486,24 +486,39 @@ export type Database = {
       track_scores: {
         Row: {
           created_at: string
+          favorite_bars: string | null
+          feature_worthy: boolean | null
+          fully_listened: boolean
           id: string
           judge_id: string
+          needs_improvement: string | null
+          reward_paid: boolean
           score: number
           score_date: string
           track_id: string
         }
         Insert: {
           created_at?: string
+          favorite_bars?: string | null
+          feature_worthy?: boolean | null
+          fully_listened?: boolean
           id?: string
           judge_id: string
+          needs_improvement?: string | null
+          reward_paid?: boolean
           score: number
           score_date?: string
           track_id: string
         }
         Update: {
           created_at?: string
+          favorite_bars?: string | null
+          feature_worthy?: boolean | null
+          fully_listened?: boolean
           id?: string
           judge_id?: string
+          needs_improvement?: string | null
+          reward_paid?: boolean
           score?: number
           score_date?: string
           track_id?: string
