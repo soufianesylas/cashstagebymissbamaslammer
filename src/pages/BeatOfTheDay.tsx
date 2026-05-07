@@ -18,7 +18,7 @@ type Entry = {
   contest_id: string;
   beat_id: string;
   slot: number;
-  beat?: { id: string; title: string; bpm: number | null; vibe: string | null; audio_path: string };
+  beat?: { id: string; title: string; bpm: number | null; vibe: string | null; audio_path: string; signed_url?: string };
   votes: number;
 };
 
