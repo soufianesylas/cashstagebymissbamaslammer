@@ -1,63 +1,58 @@
 ## Goal
 
-Wrap Cash Stage as a native **Android** app using Capacitor so you can publish it to the Google Play Store.
+Replace the current LiveApp Home tab with a styled adaptation of the pasted `CashStageGameMockup` layout — but wired to real data and existing routes, themed with the neon Cash Stage tokens.
 
-## What I'll do in Lovable
+## What changes
 
-1. **Install Capacitor packages**
-   - `@capacitor/core`, `@capacitor/android`, `@capacitor/cli` (dev)
-   - `@capacitor/microphone` — native mic permission for Studio recording
+**File: `src/pages/LiveApp.tsx`** — rewrite `HomeTab` only. No new routes, no DB changes, no business logic touched.
 
-2. **Create `capacitor.config.ts`**
-   - `appId`: `app.lovable.8f53de131f084dcca2c86d7b6633dbe8`
-   - `appName`: `cashstagebymissbamaslammer`
-   - Hot-reload server URL (`https://8f53de13-1f08-4dcc-a2c8-6d7b6633dbe8.lovableproject.com`) so a phone connected over USB can preview live changes during dev
+### New Home tab layout
 
-3. **Update the recorder** (`src/hooks/useAudioRecorder.ts`) to request native mic permission on Android via `@capacitor/microphone`, falling back to the browser flow on web. Without this, the mic is blocked on a real device.
+1. **Header strip** — keep current "ROLL THE DICE" hero (signature element, already wired to `rollTheDice`). Subtitle changes to "No Drama. Just Battles." per mockup tagline.
 
-4. **Append a build/publish guide to `README.md`** with the exact commands you'll run on your computer.
+2. **4-card action grid** (replaces the 7-button mishmash currently below the hero):
+   - **Roll & Match** → `Dice5` icon → calls `onRoll` (existing dice roll)
+   - **Solo Battle** → `Mic` icon → `navigate('/studio')`
+   - **Collab** → `Users` icon → `navigate('/crews')`
+   - **Weekly Contest** → `Trophy` icon → `navigate('/weekly')`
+   - Each card: neon border, glow on hover, semantic tokens (`bg-card`, `border-primary/30`, `text-primary` accents), `font-display` labels, primary button.
 
-## What you do on your computer (one-time)
+3. **Tabs section** (`Tabs` from `@/components/ui/tabs`) with 4 triggers: Feed / Battles / Crews / Chat.
+   - **Feed** → maps over first 3 entries of existing `feed` state → shows title, artist_name, mode badge. Tap row → switches main `tab` to `"feed"` for full list.
+   - **Battles** → filters `feed` where `mode === 'battle'` (top 3). "JOIN" button → `navigate('/studio')`. "WATCH" button on each → switches to feed tab.
+   - **Crews** → fetches top crews from `crews` table (id, name, tag, member count via `crew_members` count) on mount. Tap → `navigate('/crews')`.
+   - **Chat** → fetches public `chatrooms` (kind='public', limit 4). "ENTER" → `navigate('/chat/' + room.id)`.
+   - All cards themed (bg-card, border-border, hover:border-primary/40), Badges use existing `Badge` component with `variant="secondary"` + colored accent classes.
 
-Lovable's sandbox can't produce the `.aab` file Google Play needs — that always happens on your machine.
+4. **Safety footer** — keep existing "100% HUMAN · NO AI" badge, add second line below: `<Shield /> Block = No access to your content or voting`.
 
-1. **Connect this project to GitHub** (top-right in Lovable → GitHub → Connect), then `git clone` it.
-2. Install **Node.js** and **Android Studio** (both free).
-3. In the project folder:
-   ```text
-   npm install
-   npx cap add android
-   npm run build
-   npx cap sync android
-   npx cap open android
-   ```
-4. Android Studio opens → **Build → Generate Signed App Bundle (.aab)**. Save the keystore safely — you need it for every future update.
-5. Create a **Google Play Console** account ($25 one-time) → create app → upload the `.aab`.
+5. **Stats row** (Balance / My Tracks / Feed) stays at bottom — still useful glance info.
 
-After every Lovable change: `git pull` → `npm run build` → `npx cap sync android` → rebuild `.aab`.
+### Styling rules
 
-## Things Google Play will require (not in this step)
+- All colors via design tokens (no raw hex/`text-white`).
+- Reuse `font-display`, `text-glow`, `glow-primary`, `bg-card`, `border-primary/30`, `text-primary`, `text-accent`, `text-battle-blue`.
+- Cards use `rounded-2xl`/`rounded-3xl` and `transition-all hover:border-primary/40` to match existing TrackRow look.
+- Tabs styled via existing shadcn `Tabs` (already themed) + add `bg-secondary/60 border border-border` wrapper.
 
-- App icon (512×512) and at least 2 screenshots
-- Short + full description
-- **Privacy policy URL** (mandatory because you collect mic audio + email)
-- Content rating questionnaire
+### Data additions in LiveApp
 
-I'm flagging these so you can prepare them in parallel.
+Add two small fetches in the existing load effect:
+- `crews` (id, name, tag) limit 4 ordered by created_at desc
+- `chatrooms` where kind='public' limit 4
 
-## Files I'll touch
+Pass into `HomeTab` as props alongside existing balance/myCount/feedCount/feed.
 
-- `package.json` — add deps
-- `capacitor.config.ts` — new
-- `src/hooks/useAudioRecorder.ts` — native mic permission
-- `README.md` — append steps
+## Out of scope
 
-## Out of scope for this step
+- No changes to /studio, /crews, /chat, /weekly destinations.
+- No DB migrations or RLS changes.
+- No changes to FeedTab, StudioTab, LeaderboardTab, WalletTab.
+- The pasted mockup's `framer-motion` import is dropped (not needed; keep CSS-driven `animate-spotlight`/`animate-dice-roll` already in project).
 
-- Building the `.aab` (must run locally in Android Studio)
-- Creating the Play Store listing, icon, screenshots, privacy policy
-- iOS / App Store setup (you said Play Store only — easy to add later)
+## Acceptance
 
-## Reference
-
-[Lovable's complete Capacitor guide](https://lovable.dev/blog/2025-03-25-the-complete-guide-to-building-mobile-apps-with-lovable) — read once before running the commands; it has screenshots for every step.
+- Home tab renders 4 action cards + 4-tab inner panel + safety footer in 411px viewport without overflow.
+- Each button navigates to the correct existing route.
+- Feed/Battles inner tabs show real seeded tracks. Crews/Chat inner tabs show real rows from DB.
+- Visual matches neon Cash Stage theme (no light shadcn defaults).
