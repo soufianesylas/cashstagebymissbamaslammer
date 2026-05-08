@@ -319,41 +319,19 @@ const LiveApp = () => {
               balance={balance}
               myCount={myTracks.length}
               feedCount={feed.length}
+              feed={feed}
+              crews={crews}
+              rooms={rooms}
               onRoll={rollTheDice}
               onGoStudio={() => navigate("/studio")}
+              onGoFeed={() => setTab("feed")}
+              onGoCrews={() => navigate("/crews")}
+              onGoWeekly={() => navigate("/weekly")}
+              onGoChat={(roomId) => navigate(roomId ? `/chat/${roomId}` : "/chat")}
+              onJudge={() => judging.open()}
+              onBoost={() => navigate("/boosts")}
+              onBeat={() => navigate("/beat-of-the-day")}
             />
-          )}
-          {tab === "home" && (
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <button onClick={() => navigate("/weekly")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-primary font-bold">WEEKLY CONTEST</p>
-                <p className="font-display text-lg mt-1">$500 PRIZE</p>
-              </button>
-              <button onClick={() => navigate("/beat-of-the-day")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
-                <p className="text-[10px] tracking-widest text-accent font-bold">BEAT OF THE DAY</p>
-                <p className="font-display text-lg mt-1">VOTE NOW</p>
-              </button>
-              <button onClick={() => navigate("/crews")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CREWS</p>
-                <p className="font-display text-lg mt-1">JOIN ONE</p>
-              </button>
-              <button onClick={() => navigate("/chat")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
-                <p className="font-display text-lg mt-1">OPEN ROOMS</p>
-              </button>
-              <button onClick={() => judging.open()} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
-                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGE NOW</p>
-                <p className="font-display text-lg mt-1">10 MIN · ANON</p>
-              </button>
-              <button onClick={() => navigate("/boosts")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-primary font-bold flex items-center gap-1"><Star className="h-3 w-3" /> BOOST TRACK</p>
-                <p className="font-display text-lg mt-1">$4.99 · $8.99</p>
-              </button>
-              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary col-span-2">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
-                <p className="font-display text-lg mt-1">INVITE-ONLY PANELS</p>
-              </button>
-            </div>
           )}
           {tab === "feed" && (
             <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} onMinuteListened={countValidPlay} />
