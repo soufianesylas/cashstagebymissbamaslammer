@@ -504,7 +504,7 @@ const HomeTab = ({
         </TabsContent>
 
         <TabsContent value="crews" className="space-y-2">
-          {crews.length === 0 ? (
+          {sideLoading ? <MiniSkeleton /> : crews.length === 0 ? (
             <MiniEmpty text="No crews yet. Be the founder." />
           ) : crews.map((c, i) => (
             <button key={c.id} onClick={onGoCrews}
