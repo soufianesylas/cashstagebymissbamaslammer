@@ -359,6 +359,8 @@ const LiveApp = () => {
               feed={feed}
               crews={crews}
               rooms={rooms}
+              sideLoading={sideLoading}
+              weekly={weekly}
               onRoll={rollTheDice}
               onGoStudio={() => navigate("/studio")}
               onGoFeed={() => setTab("feed")}
