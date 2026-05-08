@@ -206,6 +206,9 @@ const LiveApp = () => {
       .channel("liveapp")
       .on("postgres_changes", { event: "*", schema: "public", table: "tracks" }, () => loadAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "track_boosts" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "track_scores" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "weekly_contests" }, () => loadAll())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
