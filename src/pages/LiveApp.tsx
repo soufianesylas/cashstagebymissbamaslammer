@@ -85,6 +85,8 @@ const LiveApp = () => {
   const [tier, setTier] = useState<Tier>("free");
   const [crews, setCrews] = useState<CrewRow[]>([]);
   const [rooms, setRooms] = useState<ChatRoomRow[]>([]);
+  const [sideLoading, setSideLoading] = useState(true);
+  const [weekly, setWeekly] = useState<{ id: string; status: string; prize_usd_cents: number } | null>(null);
   const countedPlayRef = useRef<Set<string>>(new Set());
 
   const handleSignOut = async () => {
@@ -173,9 +175,11 @@ const LiveApp = () => {
     setRefreshing(false);
 
     // Side fetches for HomeTab inner panels (best-effort, non-blocking)
-    const [{ data: crewRows }, { data: roomRows }] = await Promise.all([
+    setSideLoading(true);
+    const [{ data: crewRows }, { data: roomRows }, { data: weeklyRow }] = await Promise.all([
       supabase.from("crews").select("id, name, tag").order("created_at", { ascending: false }).limit(4),
       supabase.from("chatrooms").select("id, title, kind").eq("kind", "public").limit(4),
+      supabase.from("weekly_contests").select("id, status, prize_usd_cents").order("week_start", { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (crewRows?.length) {
       const { data: counts } = await supabase.from("crew_members").select("crew_id").in("crew_id", crewRows.map((c) => c.id));
@@ -186,6 +190,8 @@ const LiveApp = () => {
       setCrews([]);
     }
     setRooms(roomRows ?? []);
+    setWeekly(weeklyRow ?? null);
+    setSideLoading(false);
   };
 
   useEffect(() => {
@@ -200,6 +206,9 @@ const LiveApp = () => {
       .channel("liveapp")
       .on("postgres_changes", { event: "*", schema: "public", table: "tracks" }, () => loadAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "track_boosts" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "track_scores" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "weekly_contests" }, () => loadAll())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -228,11 +237,39 @@ const LiveApp = () => {
     }
   };
 
-  const rollTheDice = () => {
+  const rollTheDice = async () => {
     const modes: Mode[] = ["solo", "collab", "battle"];
     const pick = modes[Math.floor(Math.random() * modes.length)];
-    toast.success(`🎲 Rolled: ${pick.toUpperCase()} — head to the studio.`);
-    navigate("/studio");
+
+    if (pick === "battle") {
+      // Find an open battle track to match against (excluding own)
+      const { data: battleRows } = await supabase
+        .from("tracks")
+        .select("id, user_id, title")
+        .eq("mode", "battle")
+        .eq("is_hidden", false)
+        .neq("user_id", user?.id ?? "00000000-0000-0000-0000-000000000000")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (battleRows && battleRows.length > 0) {
+        const opp = battleRows[Math.floor(Math.random() * battleRows.length)];
+        toast.success(`🎲 BATTLE! Matched against "${opp.title}". Drop your verse to enter the ring.`);
+        navigate(`/studio?mode=battle&opponent=${opp.id}`);
+        return;
+      }
+      toast.info("🎲 BATTLE! No opponents online — drop the first battle track.");
+      navigate("/studio?mode=battle");
+      return;
+    }
+
+    if (pick === "collab") {
+      toast.success(`🎲 COLLAB! Pick a crew to invite into your session.`);
+      navigate("/crews");
+      return;
+    }
+
+    toast.success(`🎲 SOLO DROP! Hit record.`);
+    navigate("/studio?mode=solo");
   };
 
   const greeting = useMemo(() => {
@@ -322,6 +359,8 @@ const LiveApp = () => {
               feed={feed}
               crews={crews}
               rooms={rooms}
+              sideLoading={sideLoading}
+              weekly={weekly}
               onRoll={rollTheDice}
               onGoStudio={() => navigate("/studio")}
               onGoFeed={() => setTab("feed")}
@@ -350,17 +389,25 @@ const LiveApp = () => {
 /* ---------- Tabs ---------- */
 
 const HomeTab = ({
-  balance, myCount, feedCount, feed, crews, rooms,
+  balance, myCount, feedCount, feed, crews, rooms, sideLoading, weekly,
   onRoll, onGoStudio, onGoFeed, onGoCrews, onGoWeekly, onGoChat, onJudge, onBoost, onBeat,
 }: {
   balance: number; myCount: number; feedCount: number;
   feed: FeedTrack[]; crews: CrewRow[]; rooms: ChatRoomRow[];
+  sideLoading: boolean;
+  weekly: { id: string; status: string; prize_usd_cents: number } | null;
   onRoll: () => void; onGoStudio: () => void; onGoFeed: () => void;
   onGoCrews: () => void; onGoWeekly: () => void; onGoChat: (roomId?: string) => void;
   onJudge: () => void; onBoost: () => void; onBeat: () => void;
 }) => {
   const battles = feed.filter((t) => t.mode === "battle").slice(0, 3);
   const trending = feed.slice(0, 3);
+  const weeklyOpen = weekly?.status === "submissions";
+  const weeklyVoting = weekly?.status === "voting";
+  const weeklyCta = weeklyOpen ? "ENTER" : weeklyVoting ? "VOTE" : weekly ? "WATCH" : "ENTER";
+  const weeklyLabel = weekly
+    ? `Weekly · $${Math.round((weekly.prize_usd_cents ?? 0) / 100)}`
+    : "Weekly Contest";
   return (
     <div className="space-y-4">
       {/* Hero — ROLL THE DICE */}
@@ -375,7 +422,7 @@ const HomeTab = ({
           <h2 className="font-display text-3xl mt-4 text-glow">CASH STAGE GAME</h2>
           <p className="text-xs text-muted-foreground mt-1">No Drama. Just Battles.</p>
           <button onClick={onRoll}
-            className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
+            className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-primary">
             <Dice5 className="h-4 w-4" /> Roll & Record
           </button>
         </div>
@@ -392,7 +439,14 @@ const HomeTab = ({
         <ActionCard Icon={Dice5} label="Roll & Match" cta="ROLL" tone="primary" onClick={onRoll} />
         <ActionCard Icon={Mic} label="Solo Battle" cta="START" tone="accent" onClick={onGoStudio} />
         <ActionCard Icon={Users} label="Collab" cta="INVITE" tone="blue" onClick={onGoCrews} />
-        <ActionCard Icon={Trophy} label="Weekly Contest" cta="ENTER" tone="primary" onClick={onGoWeekly} />
+        <ActionCard
+          Icon={Trophy}
+          label={weeklyLabel}
+          cta={weeklyCta}
+          tone="primary"
+          onClick={onGoWeekly}
+          status={weekly?.status?.toUpperCase() ?? "OPEN"}
+        />
       </div>
 
       {/* Inner tabs: Feed / Battles / Crews / Chat */}
@@ -450,7 +504,7 @@ const HomeTab = ({
         </TabsContent>
 
         <TabsContent value="crews" className="space-y-2">
-          {crews.length === 0 ? (
+          {sideLoading ? <MiniSkeleton /> : crews.length === 0 ? (
             <MiniEmpty text="No crews yet. Be the founder." />
           ) : crews.map((c, i) => (
             <button key={c.id} onClick={onGoCrews}
@@ -469,7 +523,7 @@ const HomeTab = ({
         </TabsContent>
 
         <TabsContent value="chat" className="space-y-2">
-          {rooms.length === 0 ? (
+          {sideLoading ? <MiniSkeleton /> : rooms.length === 0 ? (
             <MiniEmpty text="No public rooms open right now." />
           ) : rooms.map((r) => (
             <div key={r.id} className="p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
@@ -524,11 +578,11 @@ const HomeTab = ({
 };
 
 const ActionCard = ({
-  Icon, label, cta, tone, onClick,
-}: { Icon: typeof Mic; label: string; cta: string; tone: "primary" | "accent" | "blue"; onClick: () => void; }) => {
+  Icon, label, cta, tone, onClick, status,
+}: { Icon: typeof Mic; label: string; cta: string; tone: "primary" | "accent" | "blue"; onClick: () => void; status?: string; }) => {
   const toneCls =
-    tone === "primary" ? "border-primary/40 hover:border-primary text-primary"
-    : tone === "accent" ? "border-accent/40 hover:border-accent text-accent"
+    tone === "primary" ? "border-primary/40 hover:border-primary text-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
+    : tone === "accent" ? "border-accent/40 hover:border-accent text-accent hover:shadow-[0_0_20px_hsl(var(--accent)/0.4)]"
     : "border-battle-blue/40 hover:border-battle-blue text-battle-blue";
   const btnCls =
     tone === "primary" ? "bg-primary text-primary-foreground"
@@ -538,6 +592,9 @@ const ActionCard = ({
     <div className={`p-4 rounded-2xl bg-card border ${toneCls} text-center transition-all`}>
       <Icon className="h-5 w-5 mx-auto" />
       <p className="text-xs font-bold mt-2 text-foreground">{label}</p>
+      {status && (
+        <p className="text-[8px] tracking-widest text-muted-foreground mt-0.5">{status}</p>
+      )}
       <button onClick={onClick}
         className={`w-full mt-2 py-1.5 rounded-lg text-[11px] font-bold tracking-widest ${btnCls}`}>
         {cta}
@@ -549,6 +606,17 @@ const ActionCard = ({
 const MiniEmpty = ({ text }: { text: string }) => (
   <div className="text-center py-6 rounded-2xl border border-dashed border-border text-xs text-muted-foreground">
     {text}
+  </div>
+);
+
+const MiniSkeleton = () => (
+  <div className="space-y-2">
+    {[0, 1, 2].map((i) => (
+      <div key={i} className="p-3 rounded-2xl bg-card border border-border animate-pulse">
+        <div className="h-3 w-2/3 bg-secondary rounded" />
+        <div className="h-2 w-1/3 bg-secondary/60 rounded mt-2" />
+      </div>
+    ))}
   </div>
 );
 
