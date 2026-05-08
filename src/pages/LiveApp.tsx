@@ -171,6 +171,21 @@ const LiveApp = () => {
 
     setLoading(false);
     setRefreshing(false);
+
+    // Side fetches for HomeTab inner panels (best-effort, non-blocking)
+    const [{ data: crewRows }, { data: roomRows }] = await Promise.all([
+      supabase.from("crews").select("id, name, tag").order("created_at", { ascending: false }).limit(4),
+      supabase.from("chatrooms").select("id, title, kind").eq("kind", "public").limit(4),
+    ]);
+    if (crewRows?.length) {
+      const { data: counts } = await supabase.from("crew_members").select("crew_id").in("crew_id", crewRows.map((c) => c.id));
+      const cmap = new Map<string, number>();
+      (counts ?? []).forEach((r: any) => cmap.set(r.crew_id, (cmap.get(r.crew_id) ?? 0) + 1));
+      setCrews(crewRows.map((c) => ({ ...c, member_count: cmap.get(c.id) ?? 0 })));
+    } else {
+      setCrews([]);
+    }
+    setRooms(roomRows ?? []);
   };
 
   useEffect(() => {
