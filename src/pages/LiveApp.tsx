@@ -49,6 +49,9 @@ interface LeaderRow {
   feature_worthy_count: number;
 }
 
+interface CrewRow { id: string; name: string; tag: string; member_count: number; }
+interface ChatRoomRow { id: string; title: string; kind: string; }
+
 const formatTime = (s: number) => {
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
