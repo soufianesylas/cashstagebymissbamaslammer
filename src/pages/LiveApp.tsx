@@ -85,6 +85,8 @@ const LiveApp = () => {
   const [tier, setTier] = useState<Tier>("free");
   const [crews, setCrews] = useState<CrewRow[]>([]);
   const [rooms, setRooms] = useState<ChatRoomRow[]>([]);
+  const [sideLoading, setSideLoading] = useState(true);
+  const [weekly, setWeekly] = useState<{ id: string; status: string; prize_usd_cents: number } | null>(null);
   const countedPlayRef = useRef<Set<string>>(new Set());
 
   const handleSignOut = async () => {
