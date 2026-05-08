@@ -237,11 +237,39 @@ const LiveApp = () => {
     }
   };
 
-  const rollTheDice = () => {
+  const rollTheDice = async () => {
     const modes: Mode[] = ["solo", "collab", "battle"];
     const pick = modes[Math.floor(Math.random() * modes.length)];
-    toast.success(`🎲 Rolled: ${pick.toUpperCase()} — head to the studio.`);
-    navigate("/studio");
+
+    if (pick === "battle") {
+      // Find an open battle track to match against (excluding own)
+      const { data: battleRows } = await supabase
+        .from("tracks")
+        .select("id, user_id, title")
+        .eq("mode", "battle")
+        .eq("is_hidden", false)
+        .neq("user_id", user?.id ?? "00000000-0000-0000-0000-000000000000")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (battleRows && battleRows.length > 0) {
+        const opp = battleRows[Math.floor(Math.random() * battleRows.length)];
+        toast.success(`🎲 BATTLE! Matched against "${opp.title}". Drop your verse to enter the ring.`);
+        navigate(`/studio?mode=battle&opponent=${opp.id}`);
+        return;
+      }
+      toast.info("🎲 BATTLE! No opponents online — drop the first battle track.");
+      navigate("/studio?mode=battle");
+      return;
+    }
+
+    if (pick === "collab") {
+      toast.success(`🎲 COLLAB! Pick a crew to invite into your session.`);
+      navigate("/crews");
+      return;
+    }
+
+    toast.success(`🎲 SOLO DROP! Hit record.`);
+    navigate("/studio?mode=solo");
   };
 
   const greeting = useMemo(() => {
