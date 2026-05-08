@@ -389,17 +389,25 @@ const LiveApp = () => {
 /* ---------- Tabs ---------- */
 
 const HomeTab = ({
-  balance, myCount, feedCount, feed, crews, rooms,
+  balance, myCount, feedCount, feed, crews, rooms, sideLoading, weekly,
   onRoll, onGoStudio, onGoFeed, onGoCrews, onGoWeekly, onGoChat, onJudge, onBoost, onBeat,
 }: {
   balance: number; myCount: number; feedCount: number;
   feed: FeedTrack[]; crews: CrewRow[]; rooms: ChatRoomRow[];
+  sideLoading: boolean;
+  weekly: { id: string; status: string; prize_usd_cents: number } | null;
   onRoll: () => void; onGoStudio: () => void; onGoFeed: () => void;
   onGoCrews: () => void; onGoWeekly: () => void; onGoChat: (roomId?: string) => void;
   onJudge: () => void; onBoost: () => void; onBeat: () => void;
 }) => {
   const battles = feed.filter((t) => t.mode === "battle").slice(0, 3);
   const trending = feed.slice(0, 3);
+  const weeklyOpen = weekly?.status === "submissions";
+  const weeklyVoting = weekly?.status === "voting";
+  const weeklyCta = weeklyOpen ? "ENTER" : weeklyVoting ? "VOTE" : weekly ? "WATCH" : "ENTER";
+  const weeklyLabel = weekly
+    ? `Weekly · $${Math.round((weekly.prize_usd_cents ?? 0) / 100)}`
+    : "Weekly Contest";
   return (
     <div className="space-y-4">
       {/* Hero — ROLL THE DICE */}
@@ -414,7 +422,7 @@ const HomeTab = ({
           <h2 className="font-display text-3xl mt-4 text-glow">CASH STAGE GAME</h2>
           <p className="text-xs text-muted-foreground mt-1">No Drama. Just Battles.</p>
           <button onClick={onRoll}
-            className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
+            className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-primary">
             <Dice5 className="h-4 w-4" /> Roll & Record
           </button>
         </div>
@@ -431,7 +439,14 @@ const HomeTab = ({
         <ActionCard Icon={Dice5} label="Roll & Match" cta="ROLL" tone="primary" onClick={onRoll} />
         <ActionCard Icon={Mic} label="Solo Battle" cta="START" tone="accent" onClick={onGoStudio} />
         <ActionCard Icon={Users} label="Collab" cta="INVITE" tone="blue" onClick={onGoCrews} />
-        <ActionCard Icon={Trophy} label="Weekly Contest" cta="ENTER" tone="primary" onClick={onGoWeekly} />
+        <ActionCard
+          Icon={Trophy}
+          label={weeklyLabel}
+          cta={weeklyCta}
+          tone="primary"
+          onClick={onGoWeekly}
+          status={weekly?.status?.toUpperCase() ?? "OPEN"}
+        />
       </div>
 
       {/* Inner tabs: Feed / Battles / Crews / Chat */}
