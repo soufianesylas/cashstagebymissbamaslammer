@@ -175,9 +175,11 @@ const LiveApp = () => {
     setRefreshing(false);
 
     // Side fetches for HomeTab inner panels (best-effort, non-blocking)
-    const [{ data: crewRows }, { data: roomRows }] = await Promise.all([
+    setSideLoading(true);
+    const [{ data: crewRows }, { data: roomRows }, { data: weeklyRow }] = await Promise.all([
       supabase.from("crews").select("id, name, tag").order("created_at", { ascending: false }).limit(4),
       supabase.from("chatrooms").select("id, title, kind").eq("kind", "public").limit(4),
+      supabase.from("weekly_contests").select("id, status, prize_usd_cents").order("week_start", { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (crewRows?.length) {
       const { data: counts } = await supabase.from("crew_members").select("crew_id").in("crew_id", crewRows.map((c) => c.id));
@@ -188,6 +190,8 @@ const LiveApp = () => {
       setCrews([]);
     }
     setRooms(roomRows ?? []);
+    setWeekly(weeklyRow ?? null);
+    setSideLoading(false);
   };
 
   useEffect(() => {
