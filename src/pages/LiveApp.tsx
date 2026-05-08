@@ -3,7 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Swords, Music, Users, Wallet, Mic, Play, Pause, Loader2,
   LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
+  Shield, MessageCircle,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import SiteNav from "@/components/SiteNav";
 import { ReportTrackButton } from "@/components/ReportTrackButton";
 import { useAuth } from "@/hooks/useAuth";
