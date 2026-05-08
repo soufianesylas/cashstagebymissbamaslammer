@@ -3,7 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Swords, Music, Users, Wallet, Mic, Play, Pause, Loader2,
   LogOut, Dice5, ShieldOff, Headphones, Trophy, Flame, RefreshCw, Star, Gavel,
+  Shield, MessageCircle,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import SiteNav from "@/components/SiteNav";
 import { ReportTrackButton } from "@/components/ReportTrackButton";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +49,9 @@ interface LeaderRow {
   feature_worthy_count: number;
 }
 
+interface CrewRow { id: string; name: string; tag: string; member_count: number; }
+interface ChatRoomRow { id: string; title: string; kind: string; }
+
 const formatTime = (s: number) => {
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
@@ -77,6 +83,8 @@ const LiveApp = () => {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [tier, setTier] = useState<Tier>("free");
+  const [crews, setCrews] = useState<CrewRow[]>([]);
+  const [rooms, setRooms] = useState<ChatRoomRow[]>([]);
   const countedPlayRef = useRef<Set<string>>(new Set());
 
   const handleSignOut = async () => {
@@ -163,6 +171,21 @@ const LiveApp = () => {
 
     setLoading(false);
     setRefreshing(false);
+
+    // Side fetches for HomeTab inner panels (best-effort, non-blocking)
+    const [{ data: crewRows }, { data: roomRows }] = await Promise.all([
+      supabase.from("crews").select("id, name, tag").order("created_at", { ascending: false }).limit(4),
+      supabase.from("chatrooms").select("id, title, kind").eq("kind", "public").limit(4),
+    ]);
+    if (crewRows?.length) {
+      const { data: counts } = await supabase.from("crew_members").select("crew_id").in("crew_id", crewRows.map((c) => c.id));
+      const cmap = new Map<string, number>();
+      (counts ?? []).forEach((r: any) => cmap.set(r.crew_id, (cmap.get(r.crew_id) ?? 0) + 1));
+      setCrews(crewRows.map((c) => ({ ...c, member_count: cmap.get(c.id) ?? 0 })));
+    } else {
+      setCrews([]);
+    }
+    setRooms(roomRows ?? []);
   };
 
   useEffect(() => {
@@ -296,41 +319,19 @@ const LiveApp = () => {
               balance={balance}
               myCount={myTracks.length}
               feedCount={feed.length}
+              feed={feed}
+              crews={crews}
+              rooms={rooms}
               onRoll={rollTheDice}
               onGoStudio={() => navigate("/studio")}
+              onGoFeed={() => setTab("feed")}
+              onGoCrews={() => navigate("/crews")}
+              onGoWeekly={() => navigate("/weekly")}
+              onGoChat={(roomId) => navigate(roomId ? `/chat/${roomId}` : "/chat")}
+              onJudge={() => judging.open()}
+              onBoost={() => navigate("/boosts")}
+              onBeat={() => navigate("/beat-of-the-day")}
             />
-          )}
-          {tab === "home" && (
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <button onClick={() => navigate("/weekly")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-primary font-bold">WEEKLY CONTEST</p>
-                <p className="font-display text-lg mt-1">$500 PRIZE</p>
-              </button>
-              <button onClick={() => navigate("/beat-of-the-day")} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
-                <p className="text-[10px] tracking-widest text-accent font-bold">BEAT OF THE DAY</p>
-                <p className="font-display text-lg mt-1">VOTE NOW</p>
-              </button>
-              <button onClick={() => navigate("/crews")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CREWS</p>
-                <p className="font-display text-lg mt-1">JOIN ONE</p>
-              </button>
-              <button onClick={() => navigate("/chat")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold">CHAT</p>
-                <p className="font-display text-lg mt-1">OPEN ROOMS</p>
-              </button>
-              <button onClick={() => judging.open()} className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left hover:border-accent">
-                <p className="text-[10px] tracking-widest text-accent font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGE NOW</p>
-                <p className="font-display text-lg mt-1">10 MIN · ANON</p>
-              </button>
-              <button onClick={() => navigate("/boosts")} className="rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left hover:border-primary">
-                <p className="text-[10px] tracking-widest text-primary font-bold flex items-center gap-1"><Star className="h-3 w-3" /> BOOST TRACK</p>
-                <p className="font-display text-lg mt-1">$4.99 · $8.99</p>
-              </button>
-              <button onClick={() => navigate("/judging")} className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary col-span-2">
-                <p className="text-[10px] tracking-widest text-muted-foreground font-bold flex items-center gap-1"><Gavel className="h-3 w-3" /> JUDGING SESSIONS</p>
-                <p className="font-display text-lg mt-1">INVITE-ONLY PANELS</p>
-              </button>
-            </div>
           )}
           {tab === "feed" && (
             <FeedTab tracks={feed} featured={featured} playingId={playingId} onPlay={handlePlay} onMinuteListened={countValidPlay} />
@@ -349,41 +350,205 @@ const LiveApp = () => {
 /* ---------- Tabs ---------- */
 
 const HomeTab = ({
-  balance, myCount, feedCount, onRoll, onGoStudio,
-}: { balance: number; myCount: number; feedCount: number; onRoll: () => void; onGoStudio: () => void; }) => (
-  <div className="space-y-4">
-    <div className="relative rounded-3xl overflow-hidden border border-primary/30 p-8 text-center"
-      style={{ background: "radial-gradient(ellipse at center, hsl(150 100% 25% / 0.5), hsl(0 0% 5%) 70%)" }}>
-      <div className="absolute -top-10 left-1/4 h-40 w-24 bg-primary/20 blur-2xl animate-spotlight" />
-      <div className="absolute -top-10 right-1/4 h-40 w-24 bg-primary/20 blur-2xl animate-spotlight" style={{ animationDelay: "1s" }} />
-      <div className="relative">
-        <div className="mx-auto h-20 w-20 grid place-items-center rounded-2xl bg-primary text-primary-foreground glow-primary animate-dice-roll">
-          <Dice5 className="h-12 w-12" strokeWidth={2.5} />
+  balance, myCount, feedCount, feed, crews, rooms,
+  onRoll, onGoStudio, onGoFeed, onGoCrews, onGoWeekly, onGoChat, onJudge, onBoost, onBeat,
+}: {
+  balance: number; myCount: number; feedCount: number;
+  feed: FeedTrack[]; crews: CrewRow[]; rooms: ChatRoomRow[];
+  onRoll: () => void; onGoStudio: () => void; onGoFeed: () => void;
+  onGoCrews: () => void; onGoWeekly: () => void; onGoChat: (roomId?: string) => void;
+  onJudge: () => void; onBoost: () => void; onBeat: () => void;
+}) => {
+  const battles = feed.filter((t) => t.mode === "battle").slice(0, 3);
+  const trending = feed.slice(0, 3);
+  return (
+    <div className="space-y-4">
+      {/* Hero — ROLL THE DICE */}
+      <div className="relative rounded-3xl overflow-hidden border border-primary/30 p-8 text-center"
+        style={{ background: "radial-gradient(ellipse at center, hsl(150 100% 25% / 0.5), hsl(0 0% 5%) 70%)" }}>
+        <div className="absolute -top-10 left-1/4 h-40 w-24 bg-primary/20 blur-2xl animate-spotlight" />
+        <div className="absolute -top-10 right-1/4 h-40 w-24 bg-primary/20 blur-2xl animate-spotlight" style={{ animationDelay: "1s" }} />
+        <div className="relative">
+          <div className="mx-auto h-20 w-20 grid place-items-center rounded-2xl bg-primary text-primary-foreground glow-primary animate-dice-roll">
+            <Dice5 className="h-12 w-12" strokeWidth={2.5} />
+          </div>
+          <h2 className="font-display text-3xl mt-4 text-glow">CASH STAGE GAME</h2>
+          <p className="text-xs text-muted-foreground mt-1">No Drama. Just Battles.</p>
+          <button onClick={onRoll}
+            className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
+            <Dice5 className="h-4 w-4" /> Roll & Record
+          </button>
         </div>
-        <h2 className="font-display text-3xl mt-4 text-glow">ROLL THE DICE</h2>
-        <p className="text-xs text-muted-foreground mt-1">Solo · Collab · Battle. Random pick. Real bars.</p>
-        <button onClick={onRoll}
-          className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform">
-          <Dice5 className="h-4 w-4" /> Roll & Record
+      </div>
+
+      {/* No-AI badge */}
+      <div className="flex items-center justify-center gap-2 py-2 rounded-full bg-secondary/60 border border-primary/30">
+        <ShieldOff className="h-3.5 w-3.5 text-primary" />
+        <p className="text-[10px] font-bold tracking-widest text-primary">100% HUMAN · NO AI · RECORDED IN-APP</p>
+      </div>
+
+      {/* 4 main action cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <ActionCard Icon={Dice5} label="Roll & Match" cta="ROLL" tone="primary" onClick={onRoll} />
+        <ActionCard Icon={Mic} label="Solo Battle" cta="START" tone="accent" onClick={onGoStudio} />
+        <ActionCard Icon={Users} label="Collab" cta="INVITE" tone="blue" onClick={onGoCrews} />
+        <ActionCard Icon={Trophy} label="Weekly Contest" cta="ENTER" tone="primary" onClick={onGoWeekly} />
+      </div>
+
+      {/* Inner tabs: Feed / Battles / Crews / Chat */}
+      <Tabs defaultValue="feed" className="w-full">
+        <TabsList className="grid grid-cols-4 w-full bg-card border border-border">
+          <TabsTrigger value="feed" className="text-[11px] font-bold tracking-wider">FEED</TabsTrigger>
+          <TabsTrigger value="battles" className="text-[11px] font-bold tracking-wider">BATTLES</TabsTrigger>
+          <TabsTrigger value="crews" className="text-[11px] font-bold tracking-wider">CREWS</TabsTrigger>
+          <TabsTrigger value="chat" className="text-[11px] font-bold tracking-wider">CHAT</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="feed" className="space-y-2">
+          {trending.length === 0 ? (
+            <MiniEmpty text="No drops yet — be the first." />
+          ) : trending.map((t) => (
+            <button key={t.id} onClick={onGoFeed}
+              className="w-full text-left p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
+              <p className="font-semibold truncate flex items-center gap-2">
+                <Flame className="h-4 w-4 text-primary" /> {t.title}
+              </p>
+              <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5 truncate">
+                {(t.artist_name ?? "ANON").toUpperCase()} · {t.play_count.toLocaleString()} PLAYS
+              </p>
+              <Badge variant="secondary" className="mt-2 text-[9px] tracking-widest">{t.mode.toUpperCase()}</Badge>
+            </button>
+          ))}
+          {trending.length > 0 && (
+            <button onClick={onGoFeed} className="w-full text-[11px] font-bold tracking-widest text-primary py-2">
+              VIEW FULL FEED →
+            </button>
+          )}
+        </TabsContent>
+
+        <TabsContent value="battles" className="space-y-2">
+          {battles.length === 0 ? (
+            <MiniEmpty text="No active battles. Start one in the studio." />
+          ) : battles.map((t) => (
+            <div key={t.id} className="p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
+              <p className="font-semibold truncate flex items-center gap-2">
+                <Swords className="h-4 w-4 text-primary" /> {t.title}
+              </p>
+              <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5 truncate">
+                {(t.artist_name ?? "ANON").toUpperCase()} · BATTLE MODE
+              </p>
+              <button onClick={onGoFeed}
+                className="w-full mt-2 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold">
+                WATCH
+              </button>
+            </div>
+          ))}
+          <button onClick={onGoStudio}
+            className="w-full py-2 rounded-lg bg-secondary border border-primary/30 text-xs font-bold tracking-widest text-primary">
+            START NEW BATTLE
+          </button>
+        </TabsContent>
+
+        <TabsContent value="crews" className="space-y-2">
+          {crews.length === 0 ? (
+            <MiniEmpty text="No crews yet. Be the founder." />
+          ) : crews.map((c, i) => (
+            <button key={c.id} onClick={onGoCrews}
+              className="w-full text-left p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
+              <p className="font-semibold truncate flex items-center gap-2">
+                <Users className="h-4 w-4 text-battle-blue" /> {c.name}
+              </p>
+              <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5">
+                [{c.tag}] · {c.member_count} MEMBERS
+              </p>
+              <Badge variant="secondary" className="mt-2 text-[9px] tracking-widest">
+                {i === 0 ? "ELITE" : "RISING"}
+              </Badge>
+            </button>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="chat" className="space-y-2">
+          {rooms.length === 0 ? (
+            <MiniEmpty text="No public rooms open right now." />
+          ) : rooms.map((r) => (
+            <div key={r.id} className="p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
+              <p className="font-semibold truncate flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-accent" /> {r.title}
+              </p>
+              <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5">PUBLIC ROOM</p>
+              <button onClick={() => onGoChat(r.id)}
+                className="w-full mt-2 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold">
+                ENTER
+              </button>
+            </div>
+          ))}
+        </TabsContent>
+      </Tabs>
+
+      {/* Quick actions row */}
+      <div className="grid grid-cols-3 gap-2">
+        <button onClick={onJudge} className="rounded-xl border border-accent/40 bg-accent/5 p-2.5 text-center hover:border-accent">
+          <Gavel className="h-4 w-4 mx-auto text-accent" />
+          <p className="text-[9px] tracking-widest text-accent font-bold mt-1">JUDGE</p>
+        </button>
+        <button onClick={onBoost} className="rounded-xl border border-primary/40 bg-primary/5 p-2.5 text-center hover:border-primary">
+          <Star className="h-4 w-4 mx-auto text-primary" />
+          <p className="text-[9px] tracking-widest text-primary font-bold mt-1">BOOST</p>
+        </button>
+        <button onClick={onBeat} className="rounded-xl border border-border bg-card p-2.5 text-center hover:border-primary">
+          <Music className="h-4 w-4 mx-auto text-foreground" />
+          <p className="text-[9px] tracking-widest text-muted-foreground font-bold mt-1">BEAT/DAY</p>
         </button>
       </div>
-    </div>
 
-    <div className="flex items-center justify-center gap-2 py-2 rounded-full bg-secondary/60 border border-primary/30">
-      <ShieldOff className="h-3.5 w-3.5 text-primary" />
-      <p className="text-[10px] font-bold tracking-widest text-primary">100% HUMAN · NO AI · RECORDED IN-APP</p>
-    </div>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <Stat label="Balance" value={`${balance.toLocaleString()}`} sub="CSB" />
+        <Stat label="My Tracks" value={myCount.toString()} sub="dropped" />
+        <Stat label="Feed" value={feedCount.toString()} sub="live tracks" />
+      </div>
 
-    <div className="grid grid-cols-3 gap-3">
-      <Stat label="Balance" value={`${balance.toLocaleString()}`} sub="CSB" />
-      <Stat label="My Tracks" value={myCount.toString()} sub="dropped" />
-      <Stat label="Feed" value={feedCount.toString()} sub="live tracks" />
-    </div>
+      <button onClick={onGoStudio}
+        className="w-full py-4 rounded-2xl bg-secondary border border-primary/30 hover:border-primary font-bold inline-flex items-center justify-center gap-2">
+        <Headphones className="h-4 w-4 text-primary" /> Open Full Studio
+      </button>
 
-    <button onClick={onGoStudio}
-      className="w-full py-4 rounded-2xl bg-secondary border border-primary/30 hover:border-primary font-bold inline-flex items-center justify-center gap-2">
-      <Headphones className="h-4 w-4 text-primary" /> Open Full Studio
-    </button>
+      {/* Safety footer */}
+      <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground tracking-widest">
+        <Shield className="h-3 w-3" />
+        <p>BLOCK = NO ACCESS TO YOUR CONTENT OR VOTING</p>
+      </div>
+    </div>
+  );
+};
+
+const ActionCard = ({
+  Icon, label, cta, tone, onClick,
+}: { Icon: typeof Mic; label: string; cta: string; tone: "primary" | "accent" | "blue"; onClick: () => void; }) => {
+  const toneCls =
+    tone === "primary" ? "border-primary/40 hover:border-primary text-primary"
+    : tone === "accent" ? "border-accent/40 hover:border-accent text-accent"
+    : "border-battle-blue/40 hover:border-battle-blue text-battle-blue";
+  const btnCls =
+    tone === "primary" ? "bg-primary text-primary-foreground"
+    : tone === "accent" ? "bg-accent text-accent-foreground"
+    : "bg-battle-blue text-background";
+  return (
+    <div className={`p-4 rounded-2xl bg-card border ${toneCls} text-center transition-all`}>
+      <Icon className="h-5 w-5 mx-auto" />
+      <p className="text-xs font-bold mt-2 text-foreground">{label}</p>
+      <button onClick={onClick}
+        className={`w-full mt-2 py-1.5 rounded-lg text-[11px] font-bold tracking-widest ${btnCls}`}>
+        {cta}
+      </button>
+    </div>
+  );
+};
+
+const MiniEmpty = ({ text }: { text: string }) => (
+  <div className="text-center py-6 rounded-2xl border border-dashed border-border text-xs text-muted-foreground">
+    {text}
   </div>
 );
 
