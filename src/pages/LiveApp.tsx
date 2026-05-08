@@ -523,7 +523,7 @@ const HomeTab = ({
         </TabsContent>
 
         <TabsContent value="chat" className="space-y-2">
-          {rooms.length === 0 ? (
+          {sideLoading ? <MiniSkeleton /> : rooms.length === 0 ? (
             <MiniEmpty text="No public rooms open right now." />
           ) : rooms.map((r) => (
             <div key={r.id} className="p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
