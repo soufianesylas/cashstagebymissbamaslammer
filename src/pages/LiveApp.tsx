@@ -578,11 +578,11 @@ const HomeTab = ({
 };
 
 const ActionCard = ({
-  Icon, label, cta, tone, onClick,
-}: { Icon: typeof Mic; label: string; cta: string; tone: "primary" | "accent" | "blue"; onClick: () => void; }) => {
+  Icon, label, cta, tone, onClick, status,
+}: { Icon: typeof Mic; label: string; cta: string; tone: "primary" | "accent" | "blue"; onClick: () => void; status?: string; }) => {
   const toneCls =
-    tone === "primary" ? "border-primary/40 hover:border-primary text-primary"
-    : tone === "accent" ? "border-accent/40 hover:border-accent text-accent"
+    tone === "primary" ? "border-primary/40 hover:border-primary text-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
+    : tone === "accent" ? "border-accent/40 hover:border-accent text-accent hover:shadow-[0_0_20px_hsl(var(--accent)/0.4)]"
     : "border-battle-blue/40 hover:border-battle-blue text-battle-blue";
   const btnCls =
     tone === "primary" ? "bg-primary text-primary-foreground"
@@ -592,6 +592,9 @@ const ActionCard = ({
     <div className={`p-4 rounded-2xl bg-card border ${toneCls} text-center transition-all`}>
       <Icon className="h-5 w-5 mx-auto" />
       <p className="text-xs font-bold mt-2 text-foreground">{label}</p>
+      {status && (
+        <p className="text-[8px] tracking-widest text-muted-foreground mt-0.5">{status}</p>
+      )}
       <button onClick={onClick}
         className={`w-full mt-2 py-1.5 rounded-lg text-[11px] font-bold tracking-widest ${btnCls}`}>
         {cta}
@@ -603,6 +606,17 @@ const ActionCard = ({
 const MiniEmpty = ({ text }: { text: string }) => (
   <div className="text-center py-6 rounded-2xl border border-dashed border-border text-xs text-muted-foreground">
     {text}
+  </div>
+);
+
+const MiniSkeleton = () => (
+  <div className="space-y-2">
+    {[0, 1, 2].map((i) => (
+      <div key={i} className="p-3 rounded-2xl bg-card border border-border animate-pulse">
+        <div className="h-3 w-2/3 bg-secondary rounded" />
+        <div className="h-2 w-1/3 bg-secondary/60 rounded mt-2" />
+      </div>
+    ))}
   </div>
 );
 
