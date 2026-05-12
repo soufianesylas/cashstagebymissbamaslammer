@@ -11,9 +11,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "cap:build:prod": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android",
+    "android:bump": "node scripts/bump-android-version.mjs",
+    "cap:build:prod": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump",
     "cap:open:android": "cap open android",
-    "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && cap run android"
+    "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
