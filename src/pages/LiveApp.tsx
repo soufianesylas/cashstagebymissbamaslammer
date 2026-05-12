@@ -232,7 +232,6 @@ const LiveApp = () => {
     countedPlayRef.current.add(track.id);
     const { error } = await supabase.rpc("increment_play_count", { _track_id: track.id });
     if (!error) {
-      await (supabase as any).rpc("consume_boost_play", { _track_id: track.id });
       setFeed((cur) => cur.map((t) => t.id === track.id ? { ...t, play_count: t.play_count + 1 } : t));
     }
   };

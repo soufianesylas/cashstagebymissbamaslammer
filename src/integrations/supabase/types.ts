@@ -825,6 +825,16 @@ export type Database = {
         Returns: boolean
       }
       open_todays_contest: { Args: never; Returns: string }
+      submit_track_score: {
+        Args: {
+          _favorite_bars?: string
+          _feature_worthy?: boolean
+          _needs_improvement?: string
+          _score: number
+          _track_id: string
+        }
+        Returns: string
+      }
       user_tier: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["tier"]

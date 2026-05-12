@@ -178,14 +178,12 @@ export const JudgingTimerProvider = ({ children }: { children: React.ReactNode }
     if (!fullyListened) { toast.error("Listen to the full track first"); return; }
     if (reachedCap) { toast.error("Daily judging cap reached (250)"); return; }
     setSubmitting(true);
-    const { error } = await supabase.from("track_scores").insert({
-      track_id: current.id,
-      judge_id: user.id,
-      score,
-      feature_worthy: featureWorthy,
-      favorite_bars: favorite.trim().slice(0, 500) || null,
-      needs_improvement: improvement.trim().slice(0, 500) || null,
-      fully_listened: true,
+    const { error } = await (supabase as any).rpc("submit_track_score", {
+      _track_id: current.id,
+      _score: score,
+      _feature_worthy: featureWorthy,
+      _favorite_bars: favorite.trim().slice(0, 500) || null,
+      _needs_improvement: improvement.trim().slice(0, 500) || null,
     });
     setSubmitting(false);
     if (error) {
@@ -195,7 +193,6 @@ export const JudgingTimerProvider = ({ children }: { children: React.ReactNode }
       return;
     }
     toast.success("🔒 Anonymous judgment locked · +1 CSB earned");
-    if (current.is_boosted) await supabase.rpc("consume_boost_vote", { _track_id: current.id });
     setTodayCount((n) => n + 1);
     if (idx < tracks.length - 1) setIdx(idx + 1);
     else closeSession();
