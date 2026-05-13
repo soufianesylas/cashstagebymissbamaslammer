@@ -1,7 +1,7 @@
 {
   "name": "vite_react_shadcn_ts",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,10 +11,16 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "version:read": "node scripts/read-version.mjs",
     "android:bump": "node scripts/bump-android-version.mjs",
+    "android:configure": "node scripts/configure-android-release.mjs",
+    "cap:sync:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump",
+    "cap:sync:ios": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync ios",
     "cap:build:prod": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump",
     "cap:open:android": "cap open android",
-    "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android"
+    "cap:open:ios": "cap open ios",
+    "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android",
+    "android:assembleRelease": "cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
