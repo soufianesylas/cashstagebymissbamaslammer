@@ -20,7 +20,8 @@
     "cap:open:android": "cap open android",
     "cap:open:ios": "cap open ios",
     "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android",
-    "android:assembleRelease": "cd android && ./gradlew bundleRelease"
+    "android:assembleRelease": "cd android && ./gradlew bundleRelease",
+    "release:aab": "bash scripts/release-aab.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
