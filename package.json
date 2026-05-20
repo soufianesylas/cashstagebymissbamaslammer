@@ -21,7 +21,13 @@
     "cap:open:ios": "cap open ios",
     "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android",
     "android:assembleRelease": "cd android && ./gradlew bundleRelease",
-    "release:aab": "bash scripts/release-aab.sh"
+    "release:aab": "bash scripts/release-aab.sh",
+    "release:aab:dry": "bash scripts/release-aab.sh --dry-run",
+    "release:aab:upload": "bash scripts/release-aab.sh --upload",
+    "release:ipa": "bash scripts/release-ipa.sh",
+    "release:ipa:dry": "bash scripts/release-ipa.sh --dry-run",
+    "release:verify": "node scripts/verify-aab.mjs",
+    "release:upload": "node scripts/upload-play.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
