@@ -80,15 +80,51 @@ async function api(token, path, opts = {}) {
   return body;
 }
 
+const DRY = "dry-run" in args || "dry" in args;
+
 (async () => {
-  console.log(`▶ Uploading ${AAB} → ${PKG} track=${TRACK} status=${STATUS}`);
+  console.log(`▶ ${DRY ? "[DRY RUN] " : ""}Upload plan: ${AAB} → ${PKG} track=${TRACK} status=${STATUS}`);
+  const sizeMB = (statSync(AAB).size / 1024 / 1024).toFixed(2);
+  console.log(`  bundle size: ${sizeMB} MB`);
+  console.log(`  notes:       ${NOTES}`);
+  console.log(`  service acct: ${sa.client_email}`);
+
+  console.log("▶ Validating service-account credentials");
   const token = await getAccessToken();
+  console.log("✓ OAuth token acquired");
+
+  console.log("▶ Checking Play API access (GET /edits is a no-op until commit)");
+  // A bare GET on the app endpoint verifies the SA has access to this package.
+  try {
+    await api(token, "/tracks", { method: "GET" });
+    console.log("✓ Service account can read tracks for this package");
+  } catch (e) {
+    console.error(`✖ Play API access check failed: ${e.message}`);
+    process.exit(1);
+  }
+
+  if (DRY) {
+    console.log("");
+    console.log("── DRY RUN — planned track update (NOT sent) ──");
+    console.log(JSON.stringify({
+      package: PKG,
+      track: TRACK,
+      release: {
+        status: STATUS,
+        versionCodes: ["<from uploaded bundle>"],
+        releaseNotes: [{ language: "en-US", text: NOTES }],
+      },
+    }, null, 2));
+    console.log("──────────────────────────────────────────────");
+    console.log("✓ Dry run complete. No edit was created, no bundle uploaded.");
+    return;
+  }
 
   console.log("▶ Creating edit");
   const edit = await api(token, "/edits", { method: "POST" });
   const editId = edit.id;
 
-  console.log(`▶ Uploading bundle (${(statSync(AAB).size / 1024 / 1024).toFixed(2)} MB)`);
+  console.log(`▶ Uploading bundle (${sizeMB} MB)`);
   const bundle = await fetch(
     `https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/${PKG}/edits/${editId}/bundles?uploadType=media`,
     {
