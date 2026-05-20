@@ -81,6 +81,12 @@ jobs:
         working-directory: android
         run: ./gradlew bundleRelease --no-daemon --stacktrace
 
+      - name: Verify AAB (exists + versionCode monotonic + Play limits)
+        env:
+          SKIP_HISTORY: "1"
+          EXPECTED_PACKAGE: com.missbamaslammer.cashstage
+        run: node scripts/verify-aab.mjs android/app/build/outputs/bundle/release/app-release.aab
+
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
