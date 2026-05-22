@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import AppMockup from "./pages/AppMockup.tsx";
 import LiveApp from "./pages/LiveApp.tsx";
+import PhoneApp from "./pages/PhoneApp.tsx";
 import PitchDeck from "./pages/PitchDeck.tsx";
 import Auth from "./pages/Auth.tsx";
 import Studio from "./pages/Studio.tsx";
@@ -41,7 +42,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/studio" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
-            <Route path="/app" element={<ProtectedRoute><LiveApp /></ProtectedRoute>} />
+            <Route path="/app" element={<ProtectedRoute><PhoneApp /></ProtectedRoute>} />
+            <Route path="/app/legacy" element={<ProtectedRoute><LiveApp /></ProtectedRoute>} />
             <Route path="/mockup" element={<AppMockup />} />
             <Route path="/pitch" element={<PitchDeck />} />
             <Route path="/privacy" element={<Privacy />} />
