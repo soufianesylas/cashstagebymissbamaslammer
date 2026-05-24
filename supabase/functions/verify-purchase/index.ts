@@ -111,9 +111,17 @@ Deno.serve(async (req) => {
     const grant = SKU_GRANTS[body.sku];
     if (!grant) return new Response(JSON.stringify({ error: "unknown sku" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
 
-    let valid = body.platform === "web_mock";
+    let valid = false;
     if (body.platform === "android") {
       valid = await verifyWithGoogle(body.sku, body.purchase_token);
+    } else if (body.platform === "web_mock") {
+      // Mock checkout is only valid when explicitly enabled (never in production).
+      if (Deno.env.get("ALLOW_MOCK_PURCHASES") === "true") {
+        valid = true;
+      } else {
+        console.warn("verify-purchase: web_mock attempted but ALLOW_MOCK_PURCHASES is not enabled");
+        return new Response(JSON.stringify({ granted: false, reason: "mock_disabled" }), { status: 403, headers: { ...cors, "Content-Type": "application/json" } });
+      }
     }
     if (!valid) {
       return new Response(JSON.stringify({ granted: false, reason: "verify_failed" }), { status: 200, headers: { ...cors, "Content-Type": "application/json" } });
