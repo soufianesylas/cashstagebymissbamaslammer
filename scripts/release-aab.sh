@@ -84,6 +84,9 @@ if [ "$DRY" -eq 1 ]; then
   echo "──────────────────────────────────────"
 fi
 
+echo "▶ Production config check (mock purchases must be disabled)"
+node scripts/check-prod-config.mjs
+
 run "npm ci"
 run "npm run build"
 [ -d android ] || run "npx cap add android"
