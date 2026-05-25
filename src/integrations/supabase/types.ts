@@ -824,6 +824,7 @@ export type Database = {
         Args: { _crew_id: string; _user_id: string }
         Returns: boolean
       }
+      is_panel_judge: { Args: { _session_id: string }; Returns: boolean }
       open_todays_contest: { Args: never; Returns: string }
       submit_track_score: {
         Args: {
