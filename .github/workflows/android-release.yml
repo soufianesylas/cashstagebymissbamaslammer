@@ -53,6 +53,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Production config check (block mock purchases)
+        run: node scripts/check-prod-config.mjs
+
       - name: Show version
         run: npm run version:read
 
