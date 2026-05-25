@@ -33,14 +33,18 @@ const JudgingSessions = () => {
       .select("*")
       .order("opens_at", { ascending: false })
       .limit(20);
-    setSessions((ss ?? []) as Session[]);
+    const sessionsList = (ss ?? []) as Session[];
+    setSessions(sessionsList);
 
-    if (user) {
-      const { data: panel } = await supabase
-        .from("judging_panel")
-        .select("session_id")
-        .eq("judge_id", user.id);
-      setJudgeOf(new Set((panel ?? []).map((p) => p.session_id)));
+    if (user && sessionsList.length > 0) {
+      const checks = await Promise.all(
+        sessionsList.map((s) =>
+          (supabase as any).rpc("is_panel_judge", { _session_id: s.id })
+        )
+      );
+      const mine = new Set<string>();
+      checks.forEach((r, i) => { if (r.data === true) mine.add(sessionsList[i].id); });
+      setJudgeOf(mine);
     }
     setLoading(false);
   };
