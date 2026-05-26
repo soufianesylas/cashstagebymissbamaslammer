@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 
 type Tier = "free" | "platinum" | "vip";
 
@@ -51,6 +52,23 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
+      <SEO
+        title="Pricing — Cash Stage Platinum & VIP Tiers"
+        description="Cash Stage subscription tiers: Free, Platinum ($15/mo), and VIP ($20/mo). More drops, contest entries, badges, and front-of-line perks."
+        path="/pricing"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "Cash Stage Membership",
+          description: "Subscription tiers for Cash Stage: Free, Platinum, and VIP.",
+          brand: { "@type": "Brand", name: "Cash Stage" },
+          offers: [
+            { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
+            { "@type": "Offer", name: "Platinum", price: "15", priceCurrency: "USD", priceSpecification: { "@type": "UnitPriceSpecification", price: "15", priceCurrency: "USD", billingIncrement: 1, unitCode: "MON" } },
+            { "@type": "Offer", name: "VIP", price: "20", priceCurrency: "USD", priceSpecification: { "@type": "UnitPriceSpecification", price: "20", priceCurrency: "USD", billingIncrement: 1, unitCode: "MON" } },
+          ],
+        }}
+      />
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
           <Link to="/app" className="h-9 w-9 grid place-items-center rounded-full bg-secondary">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
+import SEO from "@/components/SEO";
 import csLogo from "@/assets/cs-logo.png";
 
 type Slide = { num: string; title: string; subtitle?: string; body: JSX.Element };
@@ -204,6 +205,11 @@ const PitchDeck = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-12 stage-bg">
+      <SEO
+        title="Pitch Deck — Cash Stage"
+        description="The Cash Stage pitch: the problem, product, market, business model, and roadmap for the music platform that pays artists."
+        path="/pitch"
+      />
       <SiteNav />
       <div className="container">
         <div className="flex items-center justify-between mb-6">
