@@ -34,6 +34,7 @@ const Index = () => {
     <div className="min-h-screen text-foreground">
       <SiteNav />
 
+
       {/* HERO */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <img src={stageHero} alt="Stage with neon lights" className="absolute inset-0 w-full h-full object-cover opacity-50" />
