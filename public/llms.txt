@@ -1,0 +1,11 @@
+# Cash Stage
+
+> Cash Stage is a competitive music platform where artists battle, drop solos, and collab for real money with anonymous voting and real payouts.
+
+## Pages
+
+- [Home](/): Overview of Cash Stage — battles, solo drops, collabs, wallet, anti-cheat.
+- [Pitch Deck](/pitch): Product vision, market, and business model for Cash Stage.
+- [Pricing](/pricing): Subscription tiers and what they unlock.
+- [Privacy](/privacy): Privacy policy and data handling.
+- [Sign In](/auth): Sign up or sign in to enter the stage.
