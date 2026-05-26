@@ -1,0 +1,1 @@
+ALTER TABLE public.contest_votes ADD CONSTRAINT contest_votes_unique_voter_per_contest UNIQUE (contest_id, voter_id);
