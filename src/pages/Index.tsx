@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Dice5, Swords, Music, Coins, Zap, Shield, Users2, Sparkles, ArrowRight } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
+import SEO from "@/components/SEO";
 import stageHero from "@/assets/stage-hero.jpg";
 import csLogo from "@/assets/cs-logo.png";
 import HomeScreen from "@/components/phone/HomeScreen";
@@ -32,7 +33,13 @@ const PhoneMini = ({ children, label }: { children: React.ReactNode; label: stri
 const Index = () => {
   return (
     <div className="min-h-screen text-foreground">
+      <SEO
+        title="Cash Stage — Where Bars Turn Into Bankrolls"
+        description="Compete in music battles, drop solo tracks, collab with artists, and earn real money on Cash Stage. Anonymous voting, real payouts."
+        path="/"
+      />
       <SiteNav />
+
 
 
       {/* HERO */}

@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import SiteNav from "@/components/SiteNav";
+import SEO from "@/components/SEO";
 
 const Privacy = () => {
   const updated = "May 5, 2026";
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Privacy Policy — Cash Stage"
+        description="How Cash Stage collects, uses, and protects your data. Account info, audio uploads, payments, and your rights."
+        path="/privacy"
+      />
       <SiteNav />
       <main className="container max-w-3xl pt-28 pb-20">
         <h1 className="font-display text-4xl md:text-5xl tracking-wider mb-2">
