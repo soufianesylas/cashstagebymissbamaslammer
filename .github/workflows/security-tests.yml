@@ -1,0 +1,37 @@
+name: Security Regression Tests
+
+# Runs the RLS / authorization regression suite on every PR and push to main.
+# The suite hits the live backend with the anon publishable key only, so the
+# required secrets are non-sensitive (publishable keys are safe to expose):
+#
+#   VITE_SUPABASE_URL              project URL (e.g. https://abc.supabase.co)
+#   VITE_SUPABASE_PUBLISHABLE_KEY  anon / publishable key
+#
+# If either secret is absent the suite skips itself rather than failing, so
+# forks can still build green.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  rls-regression:
+    name: Authorization rules regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Run security regression tests
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bunx vitest run src/test/security-rls.test.ts --reporter=verbose
