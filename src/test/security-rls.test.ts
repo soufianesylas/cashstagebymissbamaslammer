@@ -60,8 +60,13 @@ d("security: anonymous client authorization rules", () => {
 
   // --- Tables that ARE intentionally publicly readable ------------------
 
+  // NOTE: `tracks` is intentionally NOT in this list. Its SELECT policy calls
+  // public.has_role(), whose EXECUTE was revoked from anon in the SECURITY
+  // DEFINER lockdown migration. Anonymous reads of tracks therefore fail
+  // with "permission denied for function has_role" — that is the current,
+  // intentional posture. If we ever re-open public track browsing, restore
+  // the row here and add a smoke read.
   const ANON_ALLOWED_READ = [
-    "tracks",
     "profiles",
     "crews",
     "daily_contests",
