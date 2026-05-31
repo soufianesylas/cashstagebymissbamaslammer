@@ -6,6 +6,10 @@ import BattleScreen from "@/components/phone/BattleScreen";
 import SoloDropScreen from "@/components/phone/SoloDropScreen";
 import CollabScreen from "@/components/phone/CollabScreen";
 import WalletScreen from "@/components/phone/WalletScreen";
+import LeaderboardScreen from "@/components/phone/LeaderboardScreen";
+import ChatScreen from "@/components/phone/ChatScreen";
+import ProfileScreen from "@/components/phone/ProfileScreen";
+import NotificationsScreen from "@/components/phone/NotificationsScreen";
 
 type Tab = "home" | "battles" | "studio" | "collab" | "wallet";
 
