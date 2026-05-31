@@ -10,6 +10,9 @@ import LeaderboardScreen from "@/components/phone/LeaderboardScreen";
 import ChatScreen from "@/components/phone/ChatScreen";
 import ProfileScreen from "@/components/phone/ProfileScreen";
 import NotificationsScreen from "@/components/phone/NotificationsScreen";
+import BattleLobbyScreen from "@/components/phone/BattleLobbyScreen";
+import BattleResultsScreen from "@/components/phone/BattleResultsScreen";
+import OnboardingScreen from "@/components/phone/OnboardingScreen";
 
 type Tab = "home" | "battles" | "studio" | "collab" | "wallet";
 
