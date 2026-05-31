@@ -10,6 +10,9 @@ import LeaderboardScreen from "@/components/phone/LeaderboardScreen";
 import ChatScreen from "@/components/phone/ChatScreen";
 import ProfileScreen from "@/components/phone/ProfileScreen";
 import NotificationsScreen from "@/components/phone/NotificationsScreen";
+import BattleLobbyScreen from "@/components/phone/BattleLobbyScreen";
+import BattleResultsScreen from "@/components/phone/BattleResultsScreen";
+import OnboardingScreen from "@/components/phone/OnboardingScreen";
 
 type Tab = "home" | "battles" | "studio" | "collab" | "wallet";
 
@@ -132,6 +135,70 @@ const AppMockup = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* Battle flow */}
+        <div className="text-center max-w-2xl mx-auto mt-24">
+          <p className="text-xs tracking-widest text-destructive font-bold">BATTLE FLOW</p>
+          <h2 className="font-display text-3xl md:text-5xl mt-2">
+            MATCH. <span className="text-gradient-primary">VERSE.</span> <span className="text-accent">PAYOUT.</span>
+          </h2>
+          <p className="text-muted-foreground mt-3 text-sm md:text-base">
+            Three taps from queue to cash-out. Anonymous opponent, locked votes, instant payout.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+          {[
+            { id: "lobby", label: "1 · Matchmaking", Comp: BattleLobbyScreen },
+            { id: "battle", label: "2 · Live Battle", Comp: BattleScreen },
+            { id: "results", label: "3 · Results", Comp: BattleResultsScreen },
+          ].map((s) => {
+            const Comp = s.Comp;
+            return (
+              <div key={s.id} className="space-y-2">
+                <div className="phone-frame mx-auto">
+                  <Comp />
+                </div>
+                <p className="text-center text-xs text-destructive tracking-widest font-bold">{s.label.toUpperCase()}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Onboarding */}
+        <div className="text-center max-w-2xl mx-auto mt-24">
+          <p className="text-xs tracking-widest text-primary font-bold">ONBOARDING FLOW</p>
+          <h2 className="font-display text-3xl md:text-5xl mt-2">
+            FOUR SLIDES. <span className="text-gradient-primary">ZERO CONFUSION.</span>
+          </h2>
+          <p className="text-muted-foreground mt-3 text-sm md:text-base">
+            Roll the dice → Human-only → Anonymous battles → Real cash. Then we let them on stage.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          {[0, 1, 2, 3].map((step) => (
+            <div key={step} className="space-y-2">
+              <div className="phone-frame mx-auto">
+                <OnboardingScreen initialStep={step as 0 | 1 | 2 | 3} />
+              </div>
+              <p className="text-center text-xs text-primary tracking-widest font-bold">SLIDE {step + 1}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Download */}
+        <div className="mt-24 text-center">
+          <a
+            href="/cash-stage-mockup.pdf"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-accent-foreground font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
+          >
+            ⬇ DOWNLOAD MOCKUP PDF
+          </a>
+          <p className="text-[10px] text-muted-foreground mt-2 tracking-widest">15 SCREENS · PRINT-READY · BRAND-LOCKED</p>
         </div>
       </div>
     </div>
