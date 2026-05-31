@@ -103,6 +103,36 @@ const AppMockup = () => {
             );
           })}
         </div>
+
+        {/* Deep screens — accessible from inside the app */}
+        <div className="text-center max-w-2xl mx-auto mt-24">
+          <p className="text-xs tracking-widest text-accent font-bold">DEEP SCREENS</p>
+          <h2 className="font-display text-3xl md:text-5xl mt-2">
+            BEYOND THE TAB BAR. <span className="text-gradient-primary">THE FULL APP.</span>
+          </h2>
+          <p className="text-muted-foreground mt-3 text-sm md:text-base">
+            Leaderboard, DMs, profile, notifications — every surface a creator touches between battles.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          {[
+            { id: "leaderboard", label: "Leaderboard", Comp: LeaderboardScreen },
+            { id: "chat", label: "DMs", Comp: ChatScreen },
+            { id: "profile", label: "Profile", Comp: ProfileScreen },
+            { id: "notifications", label: "Notifications", Comp: NotificationsScreen },
+          ].map((s) => {
+            const Comp = s.Comp;
+            return (
+              <div key={s.id} className="space-y-2">
+                <div className="phone-frame">
+                  <Comp />
+                </div>
+                <p className="text-center text-xs text-muted-foreground tracking-widest font-bold">{s.label.toUpperCase()}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
