@@ -25,6 +25,7 @@ import Moderation from "./pages/Moderation.tsx";
 import Search from "./pages/Search.tsx";
 import Notifications from "./pages/Notifications.tsx";
 import Drops from "./pages/Drops.tsx";
+import BeatLibrary from "./pages/BeatLibrary.tsx";
 import ProfileEdit from "./pages/ProfileEdit.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/drops" element={<ProtectedRoute><Drops /></ProtectedRoute>} />
+            <Route path="/beats" element={<ProtectedRoute><BeatLibrary /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
