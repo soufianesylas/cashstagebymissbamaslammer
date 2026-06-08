@@ -296,6 +296,39 @@ export type Database = {
           },
         ]
       }
+      drops: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_path: string
+          media_type: string
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_path: string
+          media_type: string
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_path?: string
+          media_type?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       judging_panel: {
         Row: {
           created_at: string
@@ -425,6 +458,7 @@ export type Database = {
           artist_name: string
           avatar_url: string | null
           bio: string | null
+          cover_url: string | null
           created_at: string
           display_name: string | null
           id: string
@@ -434,6 +468,7 @@ export type Database = {
           artist_name: string
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           id: string
@@ -443,6 +478,7 @@ export type Database = {
           artist_name?: string
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
