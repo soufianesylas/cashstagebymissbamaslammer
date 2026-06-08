@@ -158,6 +158,7 @@ const BeatLibrary = () => {
       <SEO
         title="Beat Library — Cash Stage"
         description="Upload beats, browse the producer catalog, and preview before you flow."
+        path="/beats"
       />
       <SiteNav />
       <main className="container pt-24 pb-16">
