@@ -171,6 +171,18 @@ const Auth = () => {
               />
             </div>
 
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer px-1">
+                <input
+                  type="checkbox"
+                  checked={form.is18Plus}
+                  onChange={(e) => setForm({ ...form, is18Plus: e.target.checked })}
+                  className="mt-0.5 accent-primary"
+                />
+                <span>I confirm I am <b>18 or older</b>. No drama — battlers must be adults.</span>
+              </label>
+            )}
+
             <button
               type="submit"
               disabled={submitting}
