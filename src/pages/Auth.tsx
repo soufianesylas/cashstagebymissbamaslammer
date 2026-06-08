@@ -12,6 +12,7 @@ const signUpSchema = z.object({
   artistName: z.string().trim().min(2, "At least 2 characters").max(40),
   email: z.string().trim().email("Invalid email").max(255),
   password: z.string().min(8, "At least 8 characters").max(72),
+  is18Plus: z.literal(true, { errorMap: () => ({ message: "You must be 18 or older to battle." }) }),
 });
 
 const signInSchema = z.object({
@@ -24,7 +25,7 @@ const Auth = () => {
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ artistName: "", email: "", password: "" });
+  const [form, setForm] = useState({ artistName: "", email: "", password: "", is18Plus: false });
 
   useEffect(() => {
     if (!loading && user) navigate("/app", { replace: true });
@@ -40,17 +41,20 @@ const Auth = () => {
           toast.error(parsed.error.errors[0].message);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
-            data: { artist_name: parsed.data.artistName },
+            data: { artist_name: parsed.data.artistName, is_18_plus: true },
           },
         });
         if (error) {
           toast.error(error.message.includes("already") ? "Account already exists. Try signing in." : error.message);
           return;
+        }
+        if (data.user) {
+          await supabase.from("profiles").update({ is_18_plus: true }).eq("id", data.user.id);
         }
         toast.success("Welcome to the stage!", { description: "Check your email to confirm your account." });
       } else {
@@ -166,6 +170,18 @@ const Auth = () => {
                 required
               />
             </div>
+
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer px-1">
+                <input
+                  type="checkbox"
+                  checked={form.is18Plus}
+                  onChange={(e) => setForm({ ...form, is18Plus: e.target.checked })}
+                  className="mt-0.5 accent-primary"
+                />
+                <span>I confirm I am <b>18 or older</b>. No drama — battlers must be adults.</span>
+              </label>
+            )}
 
             <button
               type="submit"
