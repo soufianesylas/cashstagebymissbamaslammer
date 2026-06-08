@@ -1,32 +1,41 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Check, Crown, Zap, Sparkles } from "lucide-react";
+import { ChevronLeft, Check, Crown, Zap, Sparkles, Loader2, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { useStripeCheckout } from "@/hooks/useStripeCheckout";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
-type Tier = "free" | "platinum" | "vip";
+type Tier = "free" | "premium" | "vip";
+type Interval = "monthly" | "yearly";
+
+const PRICES = {
+  premium: { monthly: { id: "premium_monthly", label: "$6.99/mo" }, yearly: { id: "premium_yearly", label: "$63.88/yr (save $20)" } },
+  vip: { monthly: { id: "vip_monthly", label: "$13.99/mo" }, yearly: { id: "vip_yearly", label: "$137.88/yr (save $30)" } },
+} as const;
 
 const TIERS: {
-  id: Tier; name: string; priceLabel: string; tagline: string;
+  id: Tier; name: string; tagline: string;
   Icon: typeof Crown; accent: string; perks: string[];
 }[] = [
   {
-    id: "free", name: "Free", priceLabel: "$0", tagline: "Get on stage",
+    id: "free", name: "Free", tagline: "Studio + uploads always free",
     Icon: Sparkles, accent: "text-muted-foreground border-border",
-    perks: ["3 drops a day", "1 weekly contest entry", "Vote in Beat of the Day", "Public chatrooms + crews"],
+    perks: ["3 drops a day", "Free studio + uploads", "Vote in Beat of the Day", "Public chatrooms + crews"],
   },
   {
-    id: "platinum", name: "Platinum", priceLabel: "$15/mo", tagline: "Step up",
+    id: "premium", name: "Premium", tagline: "Step up",
     Icon: Zap, accent: "text-primary border-primary/40",
-    perks: ["5 drops a day", "Unlimited weekly contests", "Featured-track discounts", "Platinum badge"],
+    perks: ["4 drops a day", "1 free Send-to-Live-Radio", "Unlimited weekly contests", "Premium badge"],
   },
   {
-    id: "vip", name: "VIP", priceLabel: "$20/mo", tagline: "Front of the line",
+    id: "vip", name: "VIP", tagline: "Top tier",
     Icon: Crown, accent: "text-accent border-accent/40",
-    perks: ["6 drops a day", "Front-of-line on one weekly contest", "Extra voice effects", "VIP-only lists & rooms"],
+    perks: ["5 drops a day", "1 free Send-to-Live-Radio", "Unlimited weekly contests", "VIP-only rooms & badge"],
   },
 ];
 
@@ -34,41 +43,65 @@ const Pricing = () => {
   const { user } = useAuth();
   const [tier, setTier] = useState<Tier>("free");
   const [loading, setLoading] = useState(true);
+  const [interval, setInterval] = useState<Interval>("monthly");
+  const [busyTier, setBusyTier] = useState<Tier | null>(null);
+  const [portalBusy, setPortalBusy] = useState(false);
+  const { openCheckout, closeCheckout, checkoutElement, isOpen } = useStripeCheckout();
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     (async () => {
-      const { data } = await supabase.from("subscriptions").select("tier").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("tier")
+        .eq("user_id", user.id)
+        .maybeSingle();
       setTier((data?.tier as Tier) ?? "free");
       setLoading(false);
     })();
   }, [user?.id]);
 
-  const upgrade = (t: Tier) => {
-    toast("Payments not enabled yet", {
-      description: "Tap your Lovable AI assistant to wire up Stripe checkout when you're ready.",
-    });
+  const upgrade = (t: Exclude<Tier, "free">) => {
+    if (!user) {
+      toast.error("Sign in to upgrade");
+      return;
+    }
+    setBusyTier(t);
+    try {
+      openCheckout({
+        priceId: PRICES[t][interval].id,
+        customerEmail: user.email,
+        userId: user.id,
+        returnUrl: `${window.location.origin}/pricing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      });
+    } finally {
+      setBusyTier(null);
+    }
+  };
+
+  const manage = async () => {
+    setPortalBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: { returnUrl: `${window.location.origin}/pricing`, environment: getStripeEnvironment() },
+      });
+      if (error || !data?.url) throw new Error(error?.message ?? "Could not open billing portal");
+      window.open(data.url, "_blank");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open billing portal");
+    } finally {
+      setPortalBusy(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
       <SEO
-        title="Pricing — Cash Stage Platinum & VIP Tiers"
-        description="Cash Stage subscription tiers: Free, Platinum ($15/mo), and VIP ($20/mo). More drops, contest entries, badges, and front-of-line perks."
+        title="Pricing — Cash Stage Premium & VIP"
+        description="Cash Stage subscription tiers: Free (3 drops/day), Premium ($6.99/mo, 4 drops + radio perk), VIP ($13.99/mo, 5 drops + radio perk). Studio and uploads are always free."
         path="/pricing"
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: "Cash Stage Membership",
-          description: "Subscription tiers for Cash Stage: Free, Platinum, and VIP.",
-          brand: { "@type": "Brand", name: "Cash Stage" },
-          offers: [
-            { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
-            { "@type": "Offer", name: "Platinum", price: "15", priceCurrency: "USD", priceSpecification: { "@type": "UnitPriceSpecification", price: "15", priceCurrency: "USD", billingIncrement: 1, unitCode: "MON" } },
-            { "@type": "Offer", name: "VIP", price: "20", priceCurrency: "USD", priceSpecification: { "@type": "UnitPriceSpecification", price: "20", priceCurrency: "USD", billingIncrement: 1, unitCode: "MON" } },
-          ],
-        }}
       />
+      <PaymentTestModeBanner />
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
           <Link to="/app" className="h-9 w-9 grid place-items-center rounded-full bg-secondary">
@@ -82,18 +115,41 @@ const Pricing = () => {
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-4">
         <div className="text-center mb-2">
           <p className="font-display text-2xl">Where Bars Turn Into Bankrolls</p>
-          <p className="text-sm text-muted-foreground mt-1">Pick the tier that matches your hustle.</p>
+          <p className="text-sm text-muted-foreground mt-1">No drama. Studio and uploads are free for everyone — battlers 18+.</p>
         </div>
 
-        {!loading && (
-          <p className="text-center text-[10px] text-muted-foreground tracking-widest">
-            CURRENT PLAN: <span className="text-primary font-bold">{tier.toUpperCase()}</span>
-          </p>
+        {/* Interval toggle */}
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <button
+            onClick={() => setInterval("monthly")}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${interval === "monthly" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setInterval("yearly")}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${interval === "yearly" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+          >
+            Yearly · save up to $30
+          </button>
+        </div>
+
+        {!loading && tier !== "free" && (
+          <div className="flex items-center justify-between rounded-xl bg-secondary/50 border border-border px-4 py-3">
+            <p className="text-xs text-muted-foreground tracking-widest">
+              CURRENT: <span className="text-primary font-bold">{tier.toUpperCase()}</span>
+            </p>
+            <Button size="sm" variant="ghost" onClick={manage} disabled={portalBusy} className="gap-2">
+              {portalBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Settings className="h-3 w-3" />}
+              Manage
+            </Button>
+          </div>
         )}
 
         {TIERS.map(t => {
           const Icon = t.Icon;
           const current = tier === t.id;
+          const priceLabel = t.id === "free" ? "$0" : PRICES[t.id as Exclude<Tier, "free">][interval].label;
           return (
             <div key={t.id} className={`rounded-2xl border-2 p-4 bg-card ${t.accent} ${current ? "ring-2 ring-primary/40" : ""}`}>
               <div className="flex items-center justify-between mb-3">
@@ -101,7 +157,7 @@ const Pricing = () => {
                   <Icon className="h-5 w-5" />
                   <p className="font-display text-xl">{t.name}</p>
                 </div>
-                <p className="font-display text-2xl">{t.priceLabel}</p>
+                <p className="font-display text-lg">{priceLabel}</p>
               </div>
               <p className="text-xs text-muted-foreground mb-3">{t.tagline}</p>
               <ul className="space-y-1.5 mb-4">
@@ -113,7 +169,12 @@ const Pricing = () => {
                 ))}
               </ul>
               {t.id !== "free" && (
-                <Button className="w-full" onClick={() => upgrade(t.id)} disabled={current}>
+                <Button
+                  className="w-full"
+                  onClick={() => upgrade(t.id as Exclude<Tier, "free">)}
+                  disabled={current || busyTier === t.id}
+                >
+                  {busyTier === t.id && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   {current ? "Your current plan" : `Upgrade to ${t.name}`}
                 </Button>
               )}
@@ -121,12 +182,22 @@ const Pricing = () => {
           );
         })}
 
-        <div className="rounded-xl bg-secondary p-3 text-[11px] text-muted-foreground space-y-1">
-          <p>📊 <b>How the app pays for itself:</b> 5% gateway fees + 50¢ per subscription, $10 featured-track submissions (50% refunded as in-app CSB if denied), 15% platform cut on beat marketplace sales.</p>
-          <p>🎁 <b>Producers always profit:</b> recurring small payouts every time their beat is used in a recording.</p>
-          <p>Prices shown exclude tax. Free users can enter ONE weekly contest per week.</p>
-        </div>
+        <p className="text-[11px] text-muted-foreground text-center">
+          Prices in USD, exclude tax. Cancel anytime in Manage. Battlers must be 18+.
+        </p>
       </div>
+
+      {/* Embedded checkout overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur overflow-y-auto">
+          <div className="max-w-2xl mx-auto p-4">
+            <button onClick={closeCheckout} className="mb-4 text-sm text-muted-foreground underline">
+              ← Close
+            </button>
+            {checkoutElement}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
