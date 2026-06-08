@@ -28,7 +28,7 @@ const ProfileEdit = () => {
     });
   }, [user?.id]);
 
-  const persist = async (patch: Record<string, any>) => {
+  const persist = async (patch: Partial<{ artist_name: string; bio: string; avatar_url: string; cover_url: string }>) => {
     if (!user) return;
     const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
     if (error) toast.error(error.message);
