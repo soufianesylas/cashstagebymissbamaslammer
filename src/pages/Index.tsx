@@ -66,8 +66,8 @@ const Index = () => {
               <Link to="/app" className="px-7 py-4 rounded-full bg-primary text-primary-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-primary">
                 <Dice5 className="h-5 w-5" /> Roll The Dice
               </Link>
-              <Link to="/pitch" className="px-7 py-4 rounded-full bg-secondary border border-border font-bold inline-flex items-center gap-2 hover:border-primary transition-colors">
-                See The Pitch <ArrowRight className="h-4 w-4" />
+              <Link to="/studio" className="px-7 py-4 rounded-full bg-secondary border border-border font-bold inline-flex items-center gap-2 hover:border-primary transition-colors">
+                Open Studio <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
@@ -187,8 +187,8 @@ const Index = () => {
             <Link to="/app" className="px-7 py-4 rounded-full bg-primary text-primary-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-primary">
               Try the App
             </Link>
-            <Link to="/pitch" className="px-7 py-4 rounded-full bg-accent text-accent-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-gold">
-              Read the Pitch
+            <Link to="/drops" className="px-7 py-4 rounded-full bg-accent text-accent-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-gold">
+              See The Drops
             </Link>
           </div>
         </div>
