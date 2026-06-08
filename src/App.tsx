@@ -7,7 +7,6 @@ import Index from "./pages/Index.tsx";
 import AppMockup from "./pages/AppMockup.tsx";
 import LiveApp from "./pages/LiveApp.tsx";
 import PhoneApp from "./pages/PhoneApp.tsx";
-import PitchDeck from "./pages/PitchDeck.tsx";
 import Auth from "./pages/Auth.tsx";
 import Studio from "./pages/Studio.tsx";
 import Privacy from "./pages/Privacy.tsx";
