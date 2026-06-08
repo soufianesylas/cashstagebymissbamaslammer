@@ -187,8 +187,8 @@ const Index = () => {
             <Link to="/app" className="px-7 py-4 rounded-full bg-primary text-primary-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-primary">
               Try the App
             </Link>
-            <Link to="/pitch" className="px-7 py-4 rounded-full bg-accent text-accent-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-gold">
-              Read the Pitch
+            <Link to="/drops" className="px-7 py-4 rounded-full bg-accent text-accent-foreground font-bold inline-flex items-center gap-2 hover:scale-105 transition-transform glow-gold">
+              See The Drops
             </Link>
           </div>
         </div>
