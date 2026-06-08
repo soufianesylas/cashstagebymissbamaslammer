@@ -25,6 +25,7 @@ import Moderation from "./pages/Moderation.tsx";
 import Search from "./pages/Search.tsx";
 import Notifications from "./pages/Notifications.tsx";
 import Drops from "./pages/Drops.tsx";
+import BeatLibrary from "./pages/BeatLibrary.tsx";
 import ProfileEdit from "./pages/ProfileEdit.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
