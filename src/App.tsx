@@ -49,7 +49,6 @@ const App = () => (
             <Route path="/app" element={<ProtectedRoute><PhoneApp /></ProtectedRoute>} />
             <Route path="/app/legacy" element={<ProtectedRoute><LiveApp /></ProtectedRoute>} />
             <Route path="/mockup" element={<AppMockup />} />
-            <Route path="/pitch" element={<PitchDeck />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/beat-of-the-day" element={<ProtectedRoute><BeatOfTheDay /></ProtectedRoute>} />
             <Route path="/crews" element={<ProtectedRoute><Crews /></ProtectedRoute>} />
