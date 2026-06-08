@@ -7,6 +7,29 @@ import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
+import MediaUploader, { type MediaKind } from "@/components/MediaUploader";
+
+const StudioMediaUploader = ({ kind }: { kind: MediaKind }) => {
+  const { user } = useAuth();
+  return (
+    <MediaUploader
+      kind={kind}
+      folder="studio"
+      label={kind === "image" ? "Photo" : kind === "video" ? "Video" : "Audio"}
+      onUploaded={async ({ path }) => {
+        if (!user) return;
+        const { error } = await supabase.from("drops").insert({
+          user_id: user.id,
+          media_type: kind,
+          media_path: path,
+          visibility: "public",
+        });
+        if (error) toast.error(error.message);
+        else toast.success("Drop posted");
+      }}
+    />
+  );
+};
 
 type Tier = "free" | "platinum" | "vip";
 const EFFECTS: { id: VoiceEffect; label: string; vipOnly?: boolean }[] = [
