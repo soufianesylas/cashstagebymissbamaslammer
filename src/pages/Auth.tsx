@@ -41,17 +41,20 @@ const Auth = () => {
           toast.error(parsed.error.errors[0].message);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
-            data: { artist_name: parsed.data.artistName },
+            data: { artist_name: parsed.data.artistName, is_18_plus: true },
           },
         });
         if (error) {
           toast.error(error.message.includes("already") ? "Account already exists. Try signing in." : error.message);
           return;
+        }
+        if (data.user) {
+          await supabase.from("profiles").update({ is_18_plus: true }).eq("id", data.user.id);
         }
         toast.success("Welcome to the stage!", { description: "Check your email to confirm your account." });
       } else {
