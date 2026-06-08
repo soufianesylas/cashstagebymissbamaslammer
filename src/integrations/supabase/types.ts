@@ -462,6 +462,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_18_plus: boolean
           updated_at: string
         }
         Insert: {
@@ -472,6 +473,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          is_18_plus?: boolean
           updated_at?: string
         }
         Update: {
@@ -482,31 +484,56 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_18_plus?: boolean
           updated_at?: string
         }
         Relationships: []
       }
       subscriptions: {
         Row: {
+          cancel_at_period_end: boolean
+          created_at: string
           current_period_end: string | null
+          current_period_start: string | null
           daily_drops: number
+          environment: string
+          free_radio_sends_remaining: number
+          price_id: string | null
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           tier: Database["public"]["Enums"]["tier"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           daily_drops?: number
+          environment?: string
+          free_radio_sends_remaining?: number
+          price_id?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["tier"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           daily_drops?: number
+          environment?: string
+          free_radio_sends_remaining?: number
+          price_id?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["tier"]
           updated_at?: string
           user_id?: string
@@ -832,6 +859,20 @@ export type Database = {
           track_id: string
         }[]
       }
+      apply_subscription_tier: {
+        Args: {
+          _cancel_at_period_end: boolean
+          _current_period_end: string
+          _current_period_start: string
+          _environment: string
+          _price_id: string
+          _status: string
+          _stripe_customer_id: string
+          _stripe_subscription_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       boosted_track_order: {
         Args: never
         Returns: {
@@ -879,7 +920,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "artist" | "judge"
-      tier: "free" | "platinum" | "vip"
+      tier: "free" | "premium" | "vip"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1008,7 +1049,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "artist", "judge"],
-      tier: ["free", "platinum", "vip"],
+      tier: ["free", "premium", "vip"],
     },
   },
 } as const
