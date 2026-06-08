@@ -7,7 +7,6 @@ import Index from "./pages/Index.tsx";
 import AppMockup from "./pages/AppMockup.tsx";
 import LiveApp from "./pages/LiveApp.tsx";
 import PhoneApp from "./pages/PhoneApp.tsx";
-import PitchDeck from "./pages/PitchDeck.tsx";
 import Auth from "./pages/Auth.tsx";
 import Studio from "./pages/Studio.tsx";
 import Privacy from "./pages/Privacy.tsx";
@@ -50,7 +49,6 @@ const App = () => (
             <Route path="/app" element={<ProtectedRoute><PhoneApp /></ProtectedRoute>} />
             <Route path="/app/legacy" element={<ProtectedRoute><LiveApp /></ProtectedRoute>} />
             <Route path="/mockup" element={<AppMockup />} />
-            <Route path="/pitch" element={<PitchDeck />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/beat-of-the-day" element={<ProtectedRoute><BeatOfTheDay /></ProtectedRoute>} />
             <Route path="/crews" element={<ProtectedRoute><Crews /></ProtectedRoute>} />
