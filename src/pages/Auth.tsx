@@ -25,7 +25,7 @@ const Auth = () => {
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ artistName: "", email: "", password: "" });
+  const [form, setForm] = useState({ artistName: "", email: "", password: "", is18Plus: false });
 
   useEffect(() => {
     if (!loading && user) navigate("/app", { replace: true });
