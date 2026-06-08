@@ -24,6 +24,8 @@ import Boosts from "./pages/Boosts.tsx";
 import Moderation from "./pages/Moderation.tsx";
 import Search from "./pages/Search.tsx";
 import Notifications from "./pages/Notifications.tsx";
+import Drops from "./pages/Drops.tsx";
+import ProfileEdit from "./pages/ProfileEdit.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
@@ -61,6 +63,8 @@ const App = () => (
             <Route path="/moderation" element={<ProtectedRoute><Moderation /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/drops" element={<ProtectedRoute><Drops /></ProtectedRoute>} />
+            <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>

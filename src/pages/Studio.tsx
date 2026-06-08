@@ -7,6 +7,29 @@ import { useAudioRecorder, type VoiceEffect } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
+import MediaUploader, { type MediaKind } from "@/components/MediaUploader";
+
+const StudioMediaUploader = ({ kind }: { kind: MediaKind }) => {
+  const { user } = useAuth();
+  return (
+    <MediaUploader
+      kind={kind}
+      folder="studio"
+      label={kind === "image" ? "Photo" : kind === "video" ? "Video" : "Audio"}
+      onUploaded={async ({ path }) => {
+        if (!user) return;
+        const { error } = await supabase.from("drops").insert({
+          user_id: user.id,
+          media_type: kind,
+          media_path: path,
+          visibility: "public",
+        });
+        if (error) toast.error(error.message);
+        else toast.success("Drop posted");
+      }}
+    />
+  );
+};
 
 type Tier = "free" | "platinum" | "vip";
 const EFFECTS: { id: VoiceEffect; label: string; vipOnly?: boolean }[] = [
@@ -257,6 +280,18 @@ const Studio = () => {
               }}
             />
           </label>
+        </div>
+
+        {/* Media drops — audio / video / photo to /drops feed */}
+        <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+          <p className="text-[10px] tracking-widest text-primary font-bold">SHARE A DROP</p>
+          <p className="text-sm text-muted-foreground">Post an audio, video, or photo drop to your profile feed.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StudioMediaUploader kind="audio" />
+            <StudioMediaUploader kind="video" />
+            <StudioMediaUploader kind="image" />
+            <Link to="/drops" className="text-xs underline text-primary self-center ml-auto">View drops →</Link>
+          </div>
         </div>
 
 
