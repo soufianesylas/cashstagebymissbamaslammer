@@ -12,6 +12,7 @@ const signUpSchema = z.object({
   artistName: z.string().trim().min(2, "At least 2 characters").max(40),
   email: z.string().trim().email("Invalid email").max(255),
   password: z.string().min(8, "At least 8 characters").max(72),
+  is18Plus: z.literal(true, { errorMap: () => ({ message: "You must be 18 or older to battle." }) }),
 });
 
 const signInSchema = z.object({
