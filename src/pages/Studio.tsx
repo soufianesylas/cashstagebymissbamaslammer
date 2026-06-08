@@ -259,6 +259,18 @@ const Studio = () => {
           </label>
         </div>
 
+        {/* Media drops — audio / video / photo to /drops feed */}
+        <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+          <p className="text-[10px] tracking-widest text-primary font-bold">SHARE A DROP</p>
+          <p className="text-sm text-muted-foreground">Post an audio, video, or photo drop to your profile feed.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StudioMediaUploader kind="audio" />
+            <StudioMediaUploader kind="video" />
+            <StudioMediaUploader kind="image" />
+            <Link to="/drops" className="text-xs underline text-primary self-center ml-auto">View drops →</Link>
+          </div>
+        </div>
+
 
         {/* Voice effects */}
         <section className="mt-8">
