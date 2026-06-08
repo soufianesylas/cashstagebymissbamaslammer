@@ -7,6 +7,7 @@ const links = [
   { to: "/", label: "Home" },
   { to: "/app", label: "App" },
   { to: "/studio", label: "Studio" },
+  { to: "/beats", label: "Beats" },
 ];
 
 const SiteNav = () => {
