@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Media: authenticated can read public profile + drop media" ON storage.objects;
