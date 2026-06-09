@@ -51,11 +51,16 @@ const Pricing = () => {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     (async () => {
-      const { data } = await supabase
+      let env: "sandbox" | "live" | null = null;
+      try { env = getStripeEnvironment(); } catch { env = null; }
+      let q = supabase
         .from("subscriptions")
         .select("tier")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (env) q = q.eq("environment", env);
+      const { data } = await q.maybeSingle();
       setTier((data?.tier as Tier) ?? "free");
       setLoading(false);
     })();
