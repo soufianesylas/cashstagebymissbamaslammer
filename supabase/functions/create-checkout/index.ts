@@ -1,4 +1,10 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient, corsHeaders, type StripeEnv } from "../_shared/stripe.ts";
+
+const supabaseAuth = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -38,10 +44,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { priceId, customerEmail, userId, returnUrl, environment } = await req.json();
+    // Require authenticated caller — derive userId/email from the verified JWT,
+    // never trust client-supplied values, to prevent attaching checkout sessions
+    // to arbitrary accounts.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { priceId, returnUrl, environment } = await req.json();
     if (!priceId || !/^[a-zA-Z0-9_-]+$/.test(priceId)) throw new Error("Invalid priceId");
     if (!returnUrl) throw new Error("Missing returnUrl");
     const env: StripeEnv = environment === "live" ? "live" : "sandbox";
+
+    const userId = user.id;
+    const customerEmail = user.email ?? undefined;
 
     const stripe = createStripeClient(env);
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
@@ -49,21 +76,17 @@ Deno.serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
-    const customerId = (customerEmail || userId)
-      ? await resolveOrCreateCustomer(stripe, { email: customerEmail, userId })
-      : undefined;
+    const customerId = await resolveOrCreateCustomer(stripe, { email: customerEmail, userId });
 
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: 1 }],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded_page",
       return_url: returnUrl,
-      ...(customerId && { customer: customerId }),
+      customer: customerId,
       managed_payments: { enabled: true },
-      ...(userId && {
-        metadata: { userId, managed_payments: "true" },
-        ...(isRecurring && { subscription_data: { metadata: { userId } } }),
-      }),
+      metadata: { userId, managed_payments: "true" },
+      ...(isRecurring && { subscription_data: { metadata: { userId } } }),
     });
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
