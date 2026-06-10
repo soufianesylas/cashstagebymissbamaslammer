@@ -11,3 +11,7 @@ verify_jwt = false
 
 [functions.payments-webhook]
 verify_jwt = false
+
+[functions.play-rtdn-webhook]
+verify_jwt = false
+
