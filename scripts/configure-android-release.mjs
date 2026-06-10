@@ -100,4 +100,46 @@ if (haveGoogleServices) {
 }
 
 writeFileSync(GRADLE, gradle);
+
+// 4. Deep-link intent-filter for Google OAuth (Chrome Custom Tabs callback).
+//    Without this, the `com.missbamaslammer.cashstage://oauth-callback` URL
+//    that Lovable Cloud Auth redirects to after Google sign-in won't reopen
+//    the app, so the sign-in flow hangs in the browser. Capacitor regenerates
+//    AndroidManifest.xml on every clean build, so we re-inject here.
+//
+//    Idempotent — wrapped in <!-- LOVABLE_OAUTH_DEEPLINK --> markers so we
+//    can replace the block in place instead of duplicating it.
+const MANIFEST = resolve(APP, "src/main/AndroidManifest.xml");
+const OAUTH_SCHEME = "com.missbamaslammer.cashstage";
+const MARK_START = "<!-- LOVABLE_OAUTH_DEEPLINK -->";
+const MARK_END = "<!-- /LOVABLE_OAUTH_DEEPLINK -->";
+if (existsSync(MANIFEST)) {
+  let manifest = readFileSync(MANIFEST, "utf8");
+  // Strip any prior injection so re-runs don't duplicate.
+  manifest = manifest.replace(
+    new RegExp(`\\s*${MARK_START}[\\s\\S]*?${MARK_END}`, "g"),
+    "",
+  );
+  const block = `
+            ${MARK_START}
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${OAUTH_SCHEME}" />
+            </intent-filter>
+            ${MARK_END}`;
+  // Inject just before </activity> of the MainActivity element.
+  const activityClose = manifest.match(/<\/activity>/);
+  if (activityClose) {
+    manifest = manifest.replace(/<\/activity>/, `${block}\n        </activity>`);
+    writeFileSync(MANIFEST, manifest);
+    console.log(`[configure-android-release] injected ${OAUTH_SCHEME}:// deep-link intent-filter`);
+  } else {
+    console.warn(`[configure-android-release] could not find </activity> in ${MANIFEST} — deep link NOT injected`);
+  }
+} else {
+  console.warn(`[configure-android-release] ${MANIFEST} not found — skipping deep-link injection`);
+}
+
 console.log("[configure-android-release] done");
