@@ -5,6 +5,7 @@ import { Dice5, Mail, Lock, User as UserIcon, ShieldOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
+import { isNativeAndroid, signInWithGoogleNative } from "@/lib/nativeAuth";
 import { toast } from "sonner";
 import csLogo from "@/assets/cs-logo.png";
 
@@ -80,14 +81,29 @@ const Auth = () => {
 
   const handleGoogle = async () => {
     setSubmitting(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/app` });
-    if (result.error) {
-      toast.error("Google sign-in failed. Try again.");
+    try {
+      // Native Android: Google blocks OAuth in embedded WebViews with
+      // `disallowed_useragent`. Route through Chrome Custom Tabs instead.
+      if (isNativeAndroid()) {
+        await signInWithGoogleNative();
+        toast.success("You're in. Roll the dice.");
+        return;
+      }
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/app` });
+      if (result.error) {
+        toast.error("Google sign-in failed. Try again.");
+        return;
+      }
+      if (result.redirected) return;
+      toast.success("You're in. Roll the dice.");
+    } catch (e: any) {
+      const msg = `${e?.message ?? ""}`;
+      if (!msg.toLowerCase().includes("cancel")) {
+        toast.error(msg || "Google sign-in failed. Try again.");
+      }
+    } finally {
       setSubmitting(false);
-      return;
     }
-    if (result.redirected) return;
-    toast.success("You're in. Roll the dice.");
   };
 
   return (
