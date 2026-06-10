@@ -4,13 +4,25 @@ on:
   workflow_dispatch:
     inputs:
       track:
-        description: "Play track (internal | alpha | beta | production)"
+        description: "Play Store track"
         required: true
         default: "internal"
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
       release_status:
-        description: "draft | inProgress | halted | completed"
+        description: "Release status"
         required: true
         default: "draft"
+        type: choice
+        options:
+          - draft
+          - inProgress
+          - halted
+          - completed
   push:
     tags:
       - "v*.*.*"
