@@ -137,6 +137,7 @@ Deno.serve(async (req) => {
       await supabase.from("track_boosts").insert({
         track_id: body.track_id, owner_id: user.id, pack: grant.pack!,
         plays_remaining: grant.plays!, votes_remaining: grant.votes!,
+        purchase_token: body.purchase_token,
       });
     } else if (grant.kind === "sub") {
       const periodEnd = new Date();
