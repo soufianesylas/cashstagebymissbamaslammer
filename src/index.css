@@ -24,7 +24,7 @@
     --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 64%;
+    --muted-foreground: 0 0% 75%;  /* raised from 64% → 75% for WCAG AA on small text */
 
     --accent: 45 100% 52%;             /* gold #FFD700 */
     --accent-foreground: 0 0% 4%;
