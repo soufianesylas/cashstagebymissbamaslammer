@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
     const stripe = createStripeClient(env);
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
-    if (!prices.data.length) throw new Error("Price not found");
+    if (!prices?.data?.length) throw new Error(`Price not found for lookup_key '${priceId}'`);
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
