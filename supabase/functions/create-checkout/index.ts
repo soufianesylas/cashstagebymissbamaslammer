@@ -16,11 +16,11 @@ async function resolveOrCreateCustomer(
       query: `metadata['userId']:'${options.userId}'`,
       limit: 1,
     });
-    if (found.data.length) return found.data[0].id;
+    if (found?.data?.length) return found.data[0].id;
   }
   if (options.email) {
     const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    if (existing.data.length) {
+    if (existing?.data?.length) {
       const customer = existing.data[0];
       if (options.userId && customer.metadata?.userId !== options.userId) {
         await stripe.customers.update(customer.id, {
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
     const stripe = createStripeClient(env);
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
-    if (!prices.data.length) throw new Error("Price not found");
+    if (!prices?.data?.length) throw new Error(`Price not found for lookup_key '${priceId}'`);
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
