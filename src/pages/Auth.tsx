@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isNativeAndroid, signInWithGoogleNative } from "@/lib/nativeAuth";
 import { toast } from "sonner";
 import csLogo from "@/assets/cs-logo.png";
+import { recordAuthError } from "@/lib/authDebug";
 
 const signUpSchema = z.object({
   artistName: z.string().trim().min(2, "At least 2 characters").max(40),
@@ -51,6 +52,7 @@ const Auth = () => {
           },
         });
         if (error) {
+          recordAuthError("signUp", error);
           toast.error(error.message.includes("already") ? "Account already exists. Try signing in." : error.message);
           return;
         }
@@ -69,6 +71,7 @@ const Auth = () => {
           password: parsed.data.password,
         });
         if (error) {
+          recordAuthError("signInWithPassword", error);
           toast.error(error.message.includes("Invalid") ? "Wrong email or password." : error.message);
           return;
         }
@@ -91,6 +94,7 @@ const Auth = () => {
       }
       const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/app` });
       if (result.error) {
+        recordAuthError("google_oauth", result.error);
         toast.error("Google sign-in failed. Try again.");
         return;
       }
@@ -99,6 +103,7 @@ const Auth = () => {
     } catch (e: any) {
       const msg = `${e?.message ?? ""}`;
       if (!msg.toLowerCase().includes("cancel")) {
+        recordAuthError("google_oauth", e);
         toast.error(msg || "Google sign-in failed. Try again.");
       }
     } finally {

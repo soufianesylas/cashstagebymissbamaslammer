@@ -26,6 +26,7 @@ import Notifications from "./pages/Notifications.tsx";
 import Drops from "./pages/Drops.tsx";
 import BeatLibrary from "./pages/BeatLibrary.tsx";
 import ProfileEdit from "./pages/ProfileEdit.tsx";
+import AuthDebug from "./pages/AuthDebug.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/drops" element={<ProtectedRoute><Drops /></ProtectedRoute>} />
             <Route path="/beats" element={<ProtectedRoute><BeatLibrary /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
+            <Route path="/auth-debug" element={<AuthDebug />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>
