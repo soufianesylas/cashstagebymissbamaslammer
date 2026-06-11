@@ -228,6 +228,12 @@ const Auth = () => {
             <ShieldOff className="h-3 w-3 text-primary" />
             <p className="text-[9px] font-bold tracking-widest text-primary">100% HUMAN · NO AI · RECORDED IN-APP</p>
           </div>
+
+          <p className="text-center mt-3">
+            <Link to="/auth-debug" className="text-[10px] tracking-widest text-muted-foreground hover:text-primary">
+              AUTH DEBUG →
+            </Link>
+          </p>
         </div>
       </div>
     </div>
