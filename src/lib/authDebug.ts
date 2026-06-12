@@ -52,3 +52,42 @@ function safeDetails(e: any) {
     return undefined;
   }
 }
+
+/**
+ * OAuth/email-link failures come back encoded in the URL (hash or query),
+ * e.g. #error=access_denied&error_code=otp_expired&error_description=...
+ * Call this once at app boot — BEFORE supabase-js strips the hash — so the
+ * failure survives the redirect and shows up on /auth-debug.
+ * Returns true if an error was captured.
+ */
+export function captureRedirectAuthError(): boolean {
+  try {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const queryParams = new URLSearchParams(window.location.search);
+    const pick = (k: string) => hashParams.get(k) ?? queryParams.get(k);
+
+    const error = pick("error");
+    const errorCode = pick("error_code");
+    const errorDescription = pick("error_description");
+    if (!error && !errorCode && !errorDescription) return false;
+
+    const rec: AuthErrorRecord = {
+      context: "oauth_redirect",
+      message: errorDescription?.replace(/\+/g, " ") ?? error ?? "Unknown redirect error",
+      name: error ?? undefined,
+      code: errorCode ?? undefined,
+      at: new Date().toISOString(),
+      details: {
+        url_path: window.location.pathname,
+        error,
+        error_code: errorCode,
+        error_description: errorDescription,
+        provider: pick("provider") ?? undefined,
+      },
+    };
+    localStorage.setItem(KEY, JSON.stringify(rec));
+    return true;
+  } catch {
+    return false;
+  }
+}

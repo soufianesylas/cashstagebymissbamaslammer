@@ -33,6 +33,7 @@ import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { App, type URLOpenListenerEvent } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
+import { recordAuthError } from "@/lib/authDebug";
 
 export const NATIVE_OAUTH_REDIRECT = "com.missbamaslammer.cashstage://oauth-callback";
 
@@ -54,7 +55,9 @@ export const signInWithGoogleNative = async (): Promise<void> => {
     },
   });
   if (error || !data?.url) {
-    throw error ?? new Error("Could not start Google sign-in");
+    const startErr = error ?? new Error("Could not start Google sign-in");
+    recordAuthError("google_native_start", startErr);
+    throw startErr;
   }
 
   // Promise that resolves when the deep link comes back, with a safety
@@ -86,6 +89,7 @@ export const signInWithGoogleNative = async (): Promise<void> => {
         resolve();
       } catch (e) {
         settled = true;
+        recordAuthError("google_native_callback", e);
         (await handle).remove();
         reject(e);
       }
