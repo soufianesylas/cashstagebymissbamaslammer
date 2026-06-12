@@ -33,6 +33,7 @@ import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { App, type URLOpenListenerEvent } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
+import { recordAuthError } from "@/lib/authDebug";
 
 export const NATIVE_OAUTH_REDIRECT = "com.missbamaslammer.cashstage://oauth-callback";
 
