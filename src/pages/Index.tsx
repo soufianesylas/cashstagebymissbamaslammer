@@ -51,7 +51,7 @@ const Index = () => {
         <div className="container relative z-10 grid lg:grid-cols-[1.2fr_1fr] gap-12 items-center">
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold">
-              <Sparkles className="h-3 w-3" /> NOW LIVE — INVITE ONLY
+              <Sparkles className="h-3 w-3" /> NOW LIVE
             </span>
             <h1 className="font-display text-6xl md:text-8xl leading-[0.9] mt-6">
               WHERE BARS <br />
