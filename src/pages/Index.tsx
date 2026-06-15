@@ -32,6 +32,8 @@ const PhoneMini = ({ children, label }: { children: React.ReactNode; label: stri
 );
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  if (!loading && user) return <Navigate to="/app" replace />;
   return (
     <div className="min-h-screen text-foreground">
       <SEO
