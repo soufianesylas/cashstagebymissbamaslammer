@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Dice5, Swords, Music, Coins, Zap, Shield, Users2, Sparkles, ArrowRight } from "lucide-react";
 import SiteNav from "@/components/SiteNav";
 import SEO from "@/components/SEO";
@@ -8,6 +8,7 @@ import HomeScreen from "@/components/phone/HomeScreen";
 import BattleScreen from "@/components/phone/BattleScreen";
 import WalletScreen from "@/components/phone/WalletScreen";
 import PhoneTabBar from "@/components/phone/PhoneTabBar";
+import { useAuth } from "@/hooks/useAuth";
 
 const features = [
   { Icon: Dice5, title: "Roll The Dice", body: "Anonymous random matchups. Pure bars decide who walks away with the bag." },
