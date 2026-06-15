@@ -180,6 +180,59 @@ const ProfileEdit = () => {
           <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save profile"}</Button>
         </div>
 
+        {/* Media uploads */}
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-base">My media</h2>
+            <span className="text-[10px] text-muted-foreground">{media.length} item{media.length === 1 ? "" : "s"}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <MediaUploader kind="audio" folder="audio" label="Upload audio"
+              onUploaded={async ({ path }) => { await addMedia("audio", path); }} />
+            <MediaUploader kind="image" folder="photos" label="Upload photo"
+              onUploaded={async ({ path }) => { await addMedia("image", path); }} />
+            <MediaUploader kind="video" folder="videos" label="Upload video"
+              onUploaded={async ({ path }) => { await addMedia("video", path); }} />
+          </div>
+
+          {media.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No uploads yet. Drop your first audio, photo, or video.</p>
+          ) : (
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {media.map((m) => (
+                <li key={m.id} className="relative rounded-xl overflow-hidden border border-border bg-secondary group">
+                  {m.kind === "image" && m.url && (
+                    <img src={m.url} alt={m.title ?? "photo"} className="w-full h-32 object-cover" />
+                  )}
+                  {m.kind === "video" && m.url && (
+                    <video src={m.url} controls className="w-full h-32 object-cover bg-black" />
+                  )}
+                  {m.kind === "audio" && (
+                    <div className="p-3 space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <Music className="h-3.5 w-3.5 text-primary" />
+                        <span className="truncate">{m.storage_path.split("/").pop()}</span>
+                      </div>
+                      {m.url && <audio src={m.url} controls className="w-full h-8" />}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => removeMedia(m)}
+                    aria-label="Delete"
+                    className="absolute top-1.5 right-1.5 h-7 w-7 grid place-items-center rounded-full bg-background/80 hover:bg-destructive hover:text-destructive-foreground transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                  <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-background/80 text-[9px] font-bold tracking-widest flex items-center gap-1">
+                    {m.kind === "image" ? <ImageIcon className="h-3 w-3" /> : m.kind === "video" ? <Video className="h-3 w-3" /> : <Music className="h-3 w-3" />}
+                    {m.kind.toUpperCase()}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* Account */}
         <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
           <h2 className="font-display text-base">Account</h2>
