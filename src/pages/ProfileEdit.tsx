@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, AlertTriangle } from "lucide-react";
+import { ChevronLeft, AlertTriangle, Music, Image as ImageIcon, Video, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import MediaUploader from "@/components/MediaUploader";
+import MediaUploader, { MediaKind } from "@/components/MediaUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+
+interface MediaItem {
+  id: string;
+  kind: MediaKind;
+  storage_path: string;
+  title: string | null;
+  created_at: string;
+  url?: string;
+}
 
 const ProfileEdit = () => {
   const { user, signOut } = useAuth();
@@ -31,6 +40,24 @@ const ProfileEdit = () => {
   const [deletePwd, setDeletePwd] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
 
+  const [media, setMedia] = useState<MediaItem[]>([]);
+
+  const loadMedia = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_media")
+      .select("id, kind, storage_path, title, created_at")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+    const rows = (data ?? []) as MediaItem[];
+    const signed = await Promise.all(
+      rows.map(async (r) => {
+        const { data: s } = await supabase.storage.from("media").createSignedUrl(r.storage_path, 60 * 60 * 24 * 7);
+        return { ...r, url: s?.signedUrl ?? "" };
+      })
+    );
+    setMedia(signed);
+  };
+
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
@@ -40,7 +67,24 @@ const ProfileEdit = () => {
       setAvatarUrl(data.avatar_url ?? null);
       setCoverUrl((data as any).cover_url ?? null);
     });
+    loadMedia(user.id);
   }, [user?.id]);
+
+  const addMedia = async (kind: MediaKind, path: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("user_media").insert({ user_id: user.id, kind, storage_path: path });
+    if (error) { toast.error(error.message); return; }
+    await loadMedia(user.id);
+  };
+
+  const removeMedia = async (item: MediaItem) => {
+    if (!user) return;
+    await supabase.storage.from("media").remove([item.storage_path]);
+    const { error } = await supabase.from("user_media").delete().eq("id", item.id);
+    if (error) { toast.error(error.message); return; }
+    setMedia((m) => m.filter((x) => x.id !== item.id));
+    toast.success("Removed");
+  };
 
   const persist = async (patch: Partial<{ artist_name: string; bio: string; avatar_url: string; cover_url: string }>) => {
     if (!user) return;
@@ -134,6 +178,59 @@ const ProfileEdit = () => {
             <Textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={500} rows={4} />
           </div>
           <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save profile"}</Button>
+        </div>
+
+        {/* Media uploads */}
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-base">My media</h2>
+            <span className="text-[10px] text-muted-foreground">{media.length} item{media.length === 1 ? "" : "s"}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <MediaUploader kind="audio" folder="audio" label="Upload audio"
+              onUploaded={async ({ path }) => { await addMedia("audio", path); }} />
+            <MediaUploader kind="image" folder="photos" label="Upload photo"
+              onUploaded={async ({ path }) => { await addMedia("image", path); }} />
+            <MediaUploader kind="video" folder="videos" label="Upload video"
+              onUploaded={async ({ path }) => { await addMedia("video", path); }} />
+          </div>
+
+          {media.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No uploads yet. Drop your first audio, photo, or video.</p>
+          ) : (
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {media.map((m) => (
+                <li key={m.id} className="relative rounded-xl overflow-hidden border border-border bg-secondary group">
+                  {m.kind === "image" && m.url && (
+                    <img src={m.url} alt={m.title ?? "photo"} className="w-full h-32 object-cover" />
+                  )}
+                  {m.kind === "video" && m.url && (
+                    <video src={m.url} controls className="w-full h-32 object-cover bg-black" />
+                  )}
+                  {m.kind === "audio" && (
+                    <div className="p-3 space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <Music className="h-3.5 w-3.5 text-primary" />
+                        <span className="truncate">{m.storage_path.split("/").pop()}</span>
+                      </div>
+                      {m.url && <audio src={m.url} controls className="w-full h-8" />}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => removeMedia(m)}
+                    aria-label="Delete"
+                    className="absolute top-1.5 right-1.5 h-7 w-7 grid place-items-center rounded-full bg-background/80 hover:bg-destructive hover:text-destructive-foreground transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                  <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-background/80 text-[9px] font-bold tracking-widest flex items-center gap-1">
+                    {m.kind === "image" ? <ImageIcon className="h-3 w-3" /> : m.kind === "video" ? <Video className="h-3 w-3" /> : <Music className="h-3 w-3" />}
+                    {m.kind.toUpperCase()}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Account */}
