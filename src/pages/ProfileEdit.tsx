@@ -40,6 +40,24 @@ const ProfileEdit = () => {
   const [deletePwd, setDeletePwd] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
 
+  const [media, setMedia] = useState<MediaItem[]>([]);
+
+  const loadMedia = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_media")
+      .select("id, kind, storage_path, title, created_at")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+    const rows = (data ?? []) as MediaItem[];
+    const signed = await Promise.all(
+      rows.map(async (r) => {
+        const { data: s } = await supabase.storage.from("media").createSignedUrl(r.storage_path, 60 * 60 * 24 * 7);
+        return { ...r, url: s?.signedUrl ?? "" };
+      })
+    );
+    setMedia(signed);
+  };
+
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
@@ -49,7 +67,24 @@ const ProfileEdit = () => {
       setAvatarUrl(data.avatar_url ?? null);
       setCoverUrl((data as any).cover_url ?? null);
     });
+    loadMedia(user.id);
   }, [user?.id]);
+
+  const addMedia = async (kind: MediaKind, path: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("user_media").insert({ user_id: user.id, kind, storage_path: path });
+    if (error) { toast.error(error.message); return; }
+    await loadMedia(user.id);
+  };
+
+  const removeMedia = async (item: MediaItem) => {
+    if (!user) return;
+    await supabase.storage.from("media").remove([item.storage_path]);
+    const { error } = await supabase.from("user_media").delete().eq("id", item.id);
+    if (error) { toast.error(error.message); return; }
+    setMedia((m) => m.filter((x) => x.id !== item.id));
+    toast.success("Removed");
+  };
 
   const persist = async (patch: Partial<{ artist_name: string; bio: string; avatar_url: string; cover_url: string }>) => {
     if (!user) return;
