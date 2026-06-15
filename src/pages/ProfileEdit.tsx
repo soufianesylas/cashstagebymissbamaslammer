@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, AlertTriangle } from "lucide-react";
+import { ChevronLeft, AlertTriangle, Music, Image as ImageIcon, Video, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import MediaUploader from "@/components/MediaUploader";
+import MediaUploader, { MediaKind } from "@/components/MediaUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+
+interface MediaItem {
+  id: string;
+  kind: MediaKind;
+  storage_path: string;
+  title: string | null;
+  created_at: string;
+  url?: string;
+}
 
 const ProfileEdit = () => {
   const { user, signOut } = useAuth();
