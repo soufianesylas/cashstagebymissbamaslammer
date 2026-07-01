@@ -30,6 +30,7 @@
     "release:upload": "node scripts/upload-play.mjs"
   },
   "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/browser": "^8.0.3",
