@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
 import MediaUploader, { type MediaKind } from "@/components/MediaUploader";
+import MultiTrackRecorder from "@/components/studio/MultiTrackRecorder";
 
 const StudioMediaUploader = ({ kind }: { kind: MediaKind }) => {
   const { user } = useAuth();
@@ -321,6 +322,11 @@ const Studio = () => {
             })}
           </div>
         </section>
+
+        {/* Multi-track recorder — record & stack unlimited layers */}
+        <MultiTrackRecorder beat={selectedBeat} beatVolume={beatVolume} />
+
+
 
         {/* Free beats library */}
         <section className="mt-10">
