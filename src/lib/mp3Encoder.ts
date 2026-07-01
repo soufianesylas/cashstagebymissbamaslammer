@@ -22,16 +22,16 @@ export function encodeMp3(buffer: AudioBuffer, bitrate: Mp3Bitrate = 192): Blob 
   const right = numCh > 1 ? floatTo16(buffer.getChannelData(1)) : null;
 
   const CHUNK = 1152;
-  const chunks: Int8Array[] = [];
+  const chunks: Uint8Array[] = [];
   for (let i = 0; i < left.length; i += CHUNK) {
     const lChunk = left.subarray(i, i + CHUNK);
     const rChunk = right ? right.subarray(i, i + CHUNK) : null;
     const mp3buf = rChunk
-      ? encoder.encodeBuffer(lChunk, rChunk)
-      : encoder.encodeBuffer(lChunk);
+      ? (encoder.encodeBuffer as any)(lChunk, rChunk)
+      : (encoder.encodeBuffer as any)(lChunk);
     if (mp3buf.length > 0) chunks.push(mp3buf);
   }
-  const end = encoder.flush();
+  const end = (encoder.flush as any)();
   if (end.length > 0) chunks.push(end);
 
   return new Blob(chunks as BlobPart[], { type: "audio/mpeg" });
