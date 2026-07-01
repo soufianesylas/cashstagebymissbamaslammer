@@ -323,6 +323,11 @@ const Studio = () => {
           </div>
         </section>
 
+        {/* Multi-track recorder — record & stack unlimited layers */}
+        <MultiTrackRecorder beat={selectedBeat} beatVolume={beatVolume} />
+
+
+
         {/* Free beats library */}
         <section className="mt-10">
           <div className="flex items-end justify-between">
