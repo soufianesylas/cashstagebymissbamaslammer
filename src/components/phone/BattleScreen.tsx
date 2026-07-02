@@ -168,6 +168,14 @@ const BattleScreen = ({
       >
         <MessageCircle className="h-4 w-4" /> Live Chat
       </button>
+
+      {/* House rules */}
+      <div className="mx-3 mt-3 rounded-xl border border-primary/40 bg-primary/5 px-3 py-2">
+        <p className="text-[10px] font-bold text-primary">18+ · Drama stays in the battle</p>
+        <p className="text-[9px] text-muted-foreground leading-snug">
+          No racism · No personal threats · Bars only. Break the rules → permanent ban.
+        </p>
+      </div>
     </div>
   );
 };
