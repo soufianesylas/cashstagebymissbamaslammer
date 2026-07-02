@@ -52,6 +52,7 @@ export type Database = {
           crew_id: string | null
           id: string
           kind: string
+          owner_id: string | null
           title: string
         }
         Insert: {
@@ -59,6 +60,7 @@ export type Database = {
           crew_id?: string | null
           id?: string
           kind: string
+          owner_id?: string | null
           title: string
         }
         Update: {
@@ -66,6 +68,7 @@ export type Database = {
           crew_id?: string | null
           id?: string
           kind?: string
+          owner_id?: string | null
           title?: string
         }
         Relationships: [
@@ -488,6 +491,35 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      room_members: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chatrooms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -929,6 +961,10 @@ export type Database = {
         Returns: boolean
       }
       is_panel_judge: { Args: { _session_id: string }; Returns: boolean }
+      is_room_member: {
+        Args: { _room_id: string; _user_id: string }
+        Returns: boolean
+      }
       open_todays_contest: { Args: never; Returns: string }
       submit_track_score: {
         Args: {

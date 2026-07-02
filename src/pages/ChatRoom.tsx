@@ -6,8 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import ChatRulesBanner from "@/components/ChatRulesBanner";
 
-type Room = { id: string; kind: "public"|"crew"; title: string; crew_id: string | null };
+type Room = { id: string; kind: "public"|"crew"|"artist_public"|"artist_private"; title: string; crew_id: string | null; owner_id?: string | null };
 type Msg = {
   id: string; room_id: string; author_id: string; body: string; created_at: string;
   profile?: { artist_name: string };
@@ -86,7 +87,8 @@ const ChatRoom = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 max-w-2xl mx-auto w-full space-y-2">
-        {messages.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">Be the first to say something.</p>}
+        <ChatRulesBanner compact />
+        {messages.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">Be the first to say something.</p>}
         {messages.map(m => {
           const mine = m.author_id === user?.id;
           return (
