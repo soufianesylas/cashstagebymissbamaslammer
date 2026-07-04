@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
 import AudioPlayer from "@/components/AudioPlayer";
-import { ChatRulesBanner } from "@/components/ChatRulesBanner";
+import ChatRulesBanner from "@/components/ChatRulesBanner";
 
 interface Collab {
   id: string;
