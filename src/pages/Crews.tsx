@@ -177,7 +177,11 @@ const Crews = () => {
                   {!myCrew && user && (c.member_count ?? 0) < 20 && (
                     <Button size="sm" variant="outline" onClick={() => joinCrew(c.id)}>Join</Button>
                   )}
-                  {myCrew?.id === c.id && <span className="text-[10px] text-primary font-bold">YOURS</span>}
+                  {myCrew?.id === c.id && (
+                    <Link to={`/crews/${c.id}/chat`}>
+                      <Button size="sm">Open Chat</Button>
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>
