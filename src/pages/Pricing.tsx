@@ -135,7 +135,7 @@ const Pricing = () => {
             onClick={() => setInterval("yearly")}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${interval === "yearly" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
           >
-            Yearly · save up to $30
+            Yearly · save up to $104
           </button>
         </div>
 
