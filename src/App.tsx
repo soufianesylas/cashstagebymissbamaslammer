@@ -69,6 +69,8 @@ const App = () => (
             <Route path="/beats" element={<ProtectedRoute><BeatLibrary /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
             <Route path="/auth-debug" element={<AuthDebug />} />
+            <Route path="/collabs" element={<ProtectedRoute><Collabs /></ProtectedRoute>} />
+            <Route path="/wheel" element={<ProtectedRoute><Wheel /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>
