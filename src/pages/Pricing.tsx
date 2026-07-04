@@ -14,8 +14,8 @@ type Tier = "free" | "premium" | "vip";
 type Interval = "monthly" | "yearly";
 
 const PRICES = {
-  premium: { monthly: { id: "premium_monthly", label: "$6.99/mo" }, yearly: { id: "premium_yearly", label: "$63.88/yr (save $20)" } },
-  vip: { monthly: { id: "vip_monthly", label: "$13.99/mo" }, yearly: { id: "vip_yearly", label: "$137.88/yr (save $30)" } },
+  premium: { monthly: { id: "premium_monthly_1299", label: "$12.99/mo" }, yearly: { id: "premium_yearly_80", label: "$80/yr (save ~$76)" } },
+  vip: { monthly: { id: "vip_monthly_22", label: "$22/mo" }, yearly: { id: "vip_yearly_160", label: "$160/yr (save $104)" } },
 } as const;
 
 const TIERS: {
@@ -28,9 +28,9 @@ const TIERS: {
     perks: ["3 drops a day", "Free studio + uploads", "Vote in Beat of the Day", "Public chatrooms + crews"],
   },
   {
-    id: "premium", name: "Premium", tagline: "Step up",
+    id: "premium", name: "Platinum", tagline: "Step up",
     Icon: Zap, accent: "text-primary border-primary/40",
-    perks: ["4 drops a day", "1 free Send-to-Live-Radio", "Unlimited weekly contests", "Premium badge"],
+    perks: ["4 drops a day", "1 free Send-to-Live-Radio", "Unlimited weekly contests", "Platinum badge"],
   },
   {
     id: "vip", name: "VIP", tagline: "Top tier",
