@@ -48,6 +48,7 @@ export type Database = {
       }
       chatrooms: {
         Row: {
+          collab_id: string | null
           created_at: string
           crew_id: string | null
           id: string
@@ -56,6 +57,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          collab_id?: string | null
           created_at?: string
           crew_id?: string | null
           id?: string
@@ -64,6 +66,7 @@ export type Database = {
           title: string
         }
         Update: {
+          collab_id?: string | null
           created_at?: string
           crew_id?: string | null
           id?: string
@@ -77,6 +80,82 @@ export type Database = {
             columns: ["crew_id"]
             isOneToOne: true
             referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_members: {
+        Row: {
+          collab_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          collab_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          collab_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_members_collab_id_fkey"
+            columns: ["collab_id"]
+            isOneToOne: false
+            referencedRelation: "collabs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collabs: {
+        Row: {
+          beat_track_id: string | null
+          created_at: string
+          genre: string | null
+          id: string
+          is_open: boolean
+          max_members: number
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          beat_track_id?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          is_open?: boolean
+          max_members?: number
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          beat_track_id?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          is_open?: boolean
+          max_members?: number
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collabs_beat_track_id_fkey"
+            columns: ["beat_track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -464,6 +543,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           display_name: string | null
+          genre: string | null
           id: string
           is_18_plus: boolean
           updated_at: string
@@ -475,6 +555,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
+          genre?: string | null
           id: string
           is_18_plus?: boolean
           updated_at?: string
@@ -486,6 +567,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
+          genre?: string | null
           id?: string
           is_18_plus?: boolean
           updated_at?: string
@@ -872,6 +954,53 @@ export type Database = {
         }
         Relationships: []
       }
+      wheel_spins: {
+        Row: {
+          boost_id: string | null
+          created_at: string
+          genre: string | null
+          id: string
+          partner_id: string | null
+          stake_kind: string
+          stake_plays: number
+          stake_votes: number
+          user_id: string
+          won: boolean
+        }
+        Insert: {
+          boost_id?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          partner_id?: string | null
+          stake_kind?: string
+          stake_plays?: number
+          stake_votes?: number
+          user_id: string
+          won: boolean
+        }
+        Update: {
+          boost_id?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          partner_id?: string | null
+          stake_kind?: string
+          stake_plays?: number
+          stake_votes?: number
+          user_id?: string
+          won?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wheel_spins_boost_id_fkey"
+            columns: ["boost_id"]
+            isOneToOne: false
+            referencedRelation: "track_boosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       contest_vote_tallies: {
@@ -956,6 +1085,10 @@ export type Database = {
         Returns: boolean
       }
       increment_play_count: { Args: { _track_id: string }; Returns: undefined }
+      is_collab_member: {
+        Args: { _collab_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_crew_member: {
         Args: { _crew_id: string; _user_id: string }
         Returns: boolean
@@ -966,6 +1099,15 @@ export type Database = {
         Returns: boolean
       }
       open_todays_contest: { Args: never; Returns: string }
+      spin_wheel_boost: {
+        Args: { _boost_id: string }
+        Returns: {
+          new_plays: number
+          new_votes: number
+          partner_id: string
+          won: boolean
+        }[]
+      }
       submit_track_score: {
         Args: {
           _favorite_bars?: string

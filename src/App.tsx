@@ -27,6 +27,8 @@ import Drops from "./pages/Drops.tsx";
 import BeatLibrary from "./pages/BeatLibrary.tsx";
 import ProfileEdit from "./pages/ProfileEdit.tsx";
 import AuthDebug from "./pages/AuthDebug.tsx";
+import Collabs from "./pages/Collabs.tsx";
+import Wheel from "./pages/Wheel.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
@@ -67,6 +69,8 @@ const App = () => (
             <Route path="/beats" element={<ProtectedRoute><BeatLibrary /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
             <Route path="/auth-debug" element={<AuthDebug />} />
+            <Route path="/collabs" element={<ProtectedRoute><Collabs /></ProtectedRoute>} />
+            <Route path="/wheel" element={<ProtectedRoute><Wheel /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>
