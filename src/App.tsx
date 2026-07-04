@@ -27,6 +27,8 @@ import Drops from "./pages/Drops.tsx";
 import BeatLibrary from "./pages/BeatLibrary.tsx";
 import ProfileEdit from "./pages/ProfileEdit.tsx";
 import AuthDebug from "./pages/AuthDebug.tsx";
+import Collabs from "./pages/Collabs.tsx";
+import Wheel from "./pages/Wheel.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
