@@ -102,8 +102,8 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
       <SEO
-        title="Pricing — Cash Stage Premium & VIP"
-        description="Cash Stage subscription tiers: Free (3 drops/day), Premium ($6.99/mo, 4 drops + radio perk), VIP ($13.99/mo, 5 drops + radio perk). Studio and uploads are always free."
+        title="Pricing — Cash Stage Platinum & VIP"
+        description="Cash Stage subscription tiers: Free (3 drops/day), Platinum ($12.99/mo, 4 drops + radio perk), VIP ($22/mo, 5 drops + radio perk). Yearly saves up to $104. Studio and uploads are always free."
         path="/pricing"
       />
       <PaymentTestModeBanner />
