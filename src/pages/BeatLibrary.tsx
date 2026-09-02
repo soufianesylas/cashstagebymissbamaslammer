@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Music2, Pause, Play, Search as SearchIcon, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Music2, Search as SearchIcon, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SiteNav from "@/components/SiteNav";
 import SEO from "@/components/SEO";
+import AudioPlayer from "@/components/AudioPlayer";
+import { signedTrackUrls } from "@/lib/storage";
 
 interface Beat {
   id: string;
@@ -35,9 +37,7 @@ const BeatLibrary = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // playback
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  // playback (signed preview URLs per beat)
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   const load = async () => {
@@ -71,42 +71,24 @@ const BeatLibrary = () => {
     return Array.from(s).sort();
   }, [beats]);
 
-  const getSignedUrl = async (path: string) => {
-    if (signedUrls[path]) return signedUrls[path];
-    const { data, error } = await supabase.storage.from("tracks").createSignedUrl(path, 60 * 60);
-    if (error || !data) {
-      toast.error("Could not load preview");
-      return null;
-    }
-    setSignedUrls((s) => ({ ...s, [path]: data.signedUrl }));
-    return data.signedUrl;
-  };
-
-  const togglePlay = async (beat: Beat) => {
-    if (playingId === beat.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
-      return;
-    }
-    const url = await getSignedUrl(beat.audio_path);
-    if (!url) return;
-    if (!audioRef.current) audioRef.current = new Audio();
-    audioRef.current.src = url;
-    audioRef.current.onended = () => setPlayingId(null);
-    try {
-      await audioRef.current.play();
-      setPlayingId(beat.id);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Playback failed");
-    }
-  };
-
+  // Pre-sign every beat so each row gets full play/pause + scrub controls.
   useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
+    const missing = beats.map((b) => b.audio_path).filter((p) => p && !signedUrls[p]);
+    if (!missing.length) return;
+    (async () => {
+      try {
+        const map = await signedTrackUrls(missing);
+        setSignedUrls((s) => {
+          const next = { ...s };
+          map.forEach((url, path) => { next[path] = url; });
+          return next;
+        });
+      } catch {
+        toast.error("Could not load previews");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [beats]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,22 +230,13 @@ const BeatLibrary = () => {
             <p className="text-muted-foreground">No beats yet — be the first to drop one.</p>
           ) : (
             filtered.map((b) => {
-              const isPlaying = playingId === b.id;
+              const url = signedUrls[b.audio_path];
               const mine = b.producer_id === user?.id;
               return (
                 <article
                   key={b.id}
-                  className="flex items-center gap-4 rounded-xl border border-border/60 bg-card/30 p-4"
+                  className="rounded-xl border border-border/60 bg-card/30 p-4 space-y-3"
                 >
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant={isPlaying ? "default" : "secondary"}
-                    onClick={() => togglePlay(b)}
-                    aria-label={isPlaying ? "Pause" : "Play"}
-                  >
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Music2 className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -280,6 +253,11 @@ const BeatLibrary = () => {
                       <span>{new Date(b.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
+                  {url ? (
+                    <AudioPlayer src={url} compact />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Loading preview…</p>
+                  )}
                 </article>
               );
             })

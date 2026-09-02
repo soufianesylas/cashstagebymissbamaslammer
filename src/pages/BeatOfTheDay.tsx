@@ -308,6 +308,11 @@ const BeatOfTheDay = () => {
                       )}
                     </Button>
                   </div>
+                  {e.beat?.signed_url && (
+                    <div className="mt-2">
+                      <AudioPlayer src={e.beat.signed_url} compact />
+                    </div>
+                  )}
                   {/* Anonymous tally bar */}
                   <div className="mt-2 h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div
