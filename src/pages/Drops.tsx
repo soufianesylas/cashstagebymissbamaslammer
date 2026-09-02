@@ -116,7 +116,9 @@ const Drops = () => {
                   <video src={d.signed_url} controls className="w-full max-h-96 bg-black" />
                 )}
                 {d.media_type === "audio" && d.signed_url && (
-                  <audio src={d.signed_url} controls className="w-full" />
+                  <div className="p-3 pb-0">
+                    <AudioPlayer src={d.signed_url} title={d.caption ?? "Drop"} />
+                  </div>
                 )}
                 <div className="p-3 flex items-start gap-2">
                   <div className="h-6 w-6 grid place-items-center rounded-full bg-secondary"><KindIcon kind={d.media_type} /></div>
