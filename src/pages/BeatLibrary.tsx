@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Music2, Pause, Play, Search as SearchIcon, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Music2, Search as SearchIcon, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SiteNav from "@/components/SiteNav";
 import SEO from "@/components/SEO";
+import AudioPlayer from "@/components/AudioPlayer";
+import { signedTrackUrls } from "@/lib/storage";
 
 interface Beat {
   id: string;
