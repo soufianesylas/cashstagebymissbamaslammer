@@ -4,6 +4,7 @@ import { ChevronLeft, Music, Film, Image as ImageIcon, Trash2, Lock, Globe2 } fr
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import MediaUploader, { type MediaKind } from "@/components/MediaUploader";
+import AudioPlayer from "@/components/AudioPlayer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
