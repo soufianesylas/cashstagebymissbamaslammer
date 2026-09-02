@@ -230,22 +230,13 @@ const BeatLibrary = () => {
             <p className="text-muted-foreground">No beats yet — be the first to drop one.</p>
           ) : (
             filtered.map((b) => {
-              const isPlaying = playingId === b.id;
+              const url = signedUrls[b.audio_path];
               const mine = b.producer_id === user?.id;
               return (
                 <article
                   key={b.id}
-                  className="flex items-center gap-4 rounded-xl border border-border/60 bg-card/30 p-4"
+                  className="rounded-xl border border-border/60 bg-card/30 p-4 space-y-3"
                 >
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant={isPlaying ? "default" : "secondary"}
-                    onClick={() => togglePlay(b)}
-                    aria-label={isPlaying ? "Pause" : "Play"}
-                  >
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Music2 className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -262,6 +253,11 @@ const BeatLibrary = () => {
                       <span>{new Date(b.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
+                  {url ? (
+                    <AudioPlayer src={url} compact />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Loading preview…</p>
+                  )}
                 </article>
               );
             })
