@@ -71,42 +71,24 @@ const BeatLibrary = () => {
     return Array.from(s).sort();
   }, [beats]);
 
-  const getSignedUrl = async (path: string) => {
-    if (signedUrls[path]) return signedUrls[path];
-    const { data, error } = await supabase.storage.from("tracks").createSignedUrl(path, 60 * 60);
-    if (error || !data) {
-      toast.error("Could not load preview");
-      return null;
-    }
-    setSignedUrls((s) => ({ ...s, [path]: data.signedUrl }));
-    return data.signedUrl;
-  };
-
-  const togglePlay = async (beat: Beat) => {
-    if (playingId === beat.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
-      return;
-    }
-    const url = await getSignedUrl(beat.audio_path);
-    if (!url) return;
-    if (!audioRef.current) audioRef.current = new Audio();
-    audioRef.current.src = url;
-    audioRef.current.onended = () => setPlayingId(null);
-    try {
-      await audioRef.current.play();
-      setPlayingId(beat.id);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Playback failed");
-    }
-  };
-
+  // Pre-sign every beat so each row gets full play/pause + scrub controls.
   useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
+    const missing = beats.map((b) => b.audio_path).filter((p) => p && !signedUrls[p]);
+    if (!missing.length) return;
+    (async () => {
+      try {
+        const map = await signedTrackUrls(missing);
+        setSignedUrls((s) => {
+          const next = { ...s };
+          map.forEach((url, path) => { next[path] = url; });
+          return next;
+        });
+      } catch {
+        toast.error("Could not load previews");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [beats]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
