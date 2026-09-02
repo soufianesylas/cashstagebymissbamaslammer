@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_entries: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          share_code: string
+          share_count: number
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          share_code?: string
+          share_count?: number
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          share_code?: string
+          share_count?: number
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_entries_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string | null
+          ends_at: string
+          genre: string | null
+          id: string
+          kind: string
+          max_entries: number
+          pot_cents: number
+          starts_at: string
+          status: string
+          ticket_price_cents: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          ends_at?: string
+          genre?: string | null
+          id?: string
+          kind?: string
+          max_entries?: number
+          pot_cents?: number
+          starts_at?: string
+          status?: string
+          ticket_price_cents?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          ends_at?: string
+          genre?: string | null
+          id?: string
+          kind?: string
+          max_entries?: number
+          pot_cents?: number
+          starts_at?: string
+          status?: string
+          ticket_price_cents?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           author_id: string
@@ -378,6 +474,50 @@ export type Database = {
           },
         ]
       }
+      daily_rank_payouts: {
+        Row: {
+          amount_cents: number
+          category: string
+          created_at: string
+          id: string
+          rank_date: string
+          status: string
+          track_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          category?: string
+          created_at?: string
+          id?: string
+          rank_date?: string
+          status?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          category?: string
+          created_at?: string
+          id?: string
+          rank_date?: string
+          status?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_rank_payouts_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drops: {
         Row: {
           caption: string | null
@@ -573,6 +713,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      rally_tickets: {
+        Row: {
+          amount_cents: number
+          challenge_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          challenge_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rally_tickets_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       room_members: {
         Row: {
@@ -1070,12 +1242,24 @@ export type Database = {
           track_id: string
         }[]
       }
+      bump_entry_share: { Args: { _entry_id: string }; Returns: number }
       close_expired_contests: { Args: never; Returns: number }
       consume_boost_play: { Args: { _track_id: string }; Returns: undefined }
       consume_boost_vote: { Args: { _track_id: string }; Returns: undefined }
       crew_role: {
         Args: { _crew_id: string; _user_id: string }
         Returns: string
+      }
+      daily_solo_rank: {
+        Args: never
+        Returns: {
+          avg_score: number
+          plays: number
+          title: string
+          track_id: string
+          user_id: string
+          votes: number
+        }[]
       }
       has_role: {
         Args: {
