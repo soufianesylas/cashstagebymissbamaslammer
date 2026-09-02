@@ -37,9 +37,7 @@ const BeatLibrary = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // playback
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  // playback (signed preview URLs per beat)
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   const load = async () => {
