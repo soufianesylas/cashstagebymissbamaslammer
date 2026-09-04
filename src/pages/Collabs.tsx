@@ -79,7 +79,7 @@ export default function Collabs() {
       .in("room_id", roomIds)
       .order("created_at", { ascending: false })
       .limit(200);
-    const authorIds = Array.from(new Set(((msgs as any) ?? []).map((x: any) => x.author_id)));
+    const authorIds: string[] = Array.from(new Set<string>(((msgs as any) ?? []).map((x: any) => x.author_id as string)));
     const names: Record<string, string> = {};
     if (authorIds.length) {
       const { data: profs } = await supabase.from("profiles").select("id, artist_name").in("id", authorIds);
