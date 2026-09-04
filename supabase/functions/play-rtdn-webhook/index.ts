@@ -107,6 +107,20 @@ async function fetchProduct(pkg: string, sku: string, token: string, accessToken
   return await res.json();
 }
 
+// Confirms with Google's Voided Purchases API that a purchase token was
+// actually refunded/charged back. Looks back 30 days.
+async function isVoidedWithGoogle(pkg: string, purchaseToken: string, accessToken: string) {
+  const startTime = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const res = await fetch(
+    `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${pkg}/purchases/voidedpurchases?startTime=${startTime}&maxResults=1000`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  if (!res.ok) return false;
+  const json = await res.json();
+  const list: any[] = json?.voidedPurchases ?? [];
+  return list.some((v) => v?.purchaseToken === purchaseToken);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") {
