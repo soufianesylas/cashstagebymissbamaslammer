@@ -29,6 +29,7 @@ import ProfileEdit from "./pages/ProfileEdit.tsx";
 import AuthDebug from "./pages/AuthDebug.tsx";
 import Collabs from "./pages/Collabs.tsx";
 import Wheel from "./pages/Wheel.tsx";
+import Challenges from "./pages/Challenges.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AdGateProvider } from "./components/AdGate";
