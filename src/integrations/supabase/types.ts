@@ -859,6 +859,30 @@ export type Database = {
         }
         Relationships: []
       }
+      track_plays: {
+        Row: {
+          created_at: string
+          id: string
+          play_date: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          play_date?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          play_date?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       track_reports: {
         Row: {
           created_at: string
