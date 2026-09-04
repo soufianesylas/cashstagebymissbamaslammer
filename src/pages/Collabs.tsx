@@ -195,6 +195,29 @@ export default function Collabs() {
             {c.beat_track_id && beatUrl(c.beat_track_id) && (
               <AudioPlayer src={beatUrl(c.beat_track_id)!} compact />
             )}
+
+            {/* Latest chat posts, straight from this collab's room */}
+            <div className="rounded-lg bg-secondary/60 border border-border p-2 space-y-1.5">
+              <p className="text-[10px] text-muted-foreground tracking-widest">LATEST IN CHAT</p>
+              {(feed[c.id] ?? []).length === 0 ? (
+                <p className="text-[11px] text-muted-foreground">
+                  {rooms[c.id] ? "No posts yet — join the chat and start it off." : "Chat opens once you join."}
+                </p>
+              ) : (
+                (feed[c.id] ?? []).map(p => (
+                  <div key={p.id} className="text-[11px] leading-snug">
+                    <span className="font-bold">{p.author}</span>{" "}
+                    <span className="text-foreground/90">{p.body}</span>{" "}
+                    <span className="text-muted-foreground">· {new Date(p.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                  </div>
+                ))
+              )}
+              {rooms[c.id] && (
+                <Link to={`/chat/${rooms[c.id]}`} className="inline-block text-[11px] font-bold text-primary">
+                  Open collab chat →
+                </Link>
+              )}
+            </div>
           </div>
         ))}
       </div>
