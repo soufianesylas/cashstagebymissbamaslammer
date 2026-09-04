@@ -72,6 +72,7 @@ const App = () => (
             <Route path="/auth-debug" element={<AuthDebug />} />
             <Route path="/collabs" element={<ProtectedRoute><Collabs /></ProtectedRoute>} />
             <Route path="/wheel" element={<ProtectedRoute><Wheel /></ProtectedRoute>} />
+            <Route path="/challenges" element={<ProtectedRoute><Challenges /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </JudgingTimerProvider>
