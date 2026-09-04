@@ -230,6 +230,13 @@ Deno.serve(async (req) => {
     // --- Voided purchase (refund / chargeback) ---
     const voided = payload.voidedPurchaseNotification;
     if (voided?.purchaseToken) {
+      // Re-verify with Google that this purchase really was voided before we
+      // revoke anything — never trust the payload alone.
+      const confirmed = await isVoidedWithGoogle(pkg, voided.purchaseToken, accessToken);
+      if (!confirmed) {
+        console.warn("play-rtdn-webhook: voided notification not confirmed by Google");
+        return new Response("ok", { status: 200, headers: cors });
+      }
       // Revoke any boost rows tied to this purchase token. We store the
       // purchase_token on track_boosts when grants are issued; if a refund
       // hits, zero them out so the artist can't keep playing/voting on a
