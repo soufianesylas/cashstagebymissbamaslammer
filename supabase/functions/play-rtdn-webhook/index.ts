@@ -113,11 +113,16 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: cors });
   }
 
-  // 1. Optional shared-secret check
+  // 1. Shared-secret check (REQUIRED — no token configured means no access)
   const expectedToken = Deno.env.get("PLAY_RTDN_PUSH_TOKEN");
-  if (expectedToken) {
+  if (!expectedToken) {
+    console.error("play-rtdn-webhook: PLAY_RTDN_PUSH_TOKEN is not configured");
+    return new Response("forbidden", { status: 403, headers: cors });
+  }
+  {
     const url = new URL(req.url);
-    if (url.searchParams.get("token") !== expectedToken) {
+    const headerToken = req.headers.get("x-play-rtdn-token");
+    if (url.searchParams.get("token") !== expectedToken && headerToken !== expectedToken) {
       console.warn("play-rtdn-webhook: bad or missing push token");
       return new Response("forbidden", { status: 403, headers: cors });
     }
