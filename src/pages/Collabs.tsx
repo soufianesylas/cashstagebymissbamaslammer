@@ -23,6 +23,7 @@ interface Collab {
   created_at: string;
 }
 interface Track { id: string; title: string; audio_url: string | null }
+interface Post { id: string; body: string; created_at: string; author: string }
 
 const GENRES = ["Hip-Hop","Trap","R&B","Pop","Drill","Afrobeat","Country","Rock","Latin","Other"];
 
