@@ -78,6 +78,34 @@ const Boosts = () => {
           </p>
         </div>
 
+        {/* Spin the Wheel — gamble a live boost pack */}
+        {(() => {
+          const spinnable = boosts.filter((b) => b.plays_remaining > 0 || b.votes_remaining > 0);
+          const totalPlays = spinnable.reduce((a, b) => a + b.plays_remaining, 0);
+          const totalVotes = spinnable.reduce((a, b) => a + b.votes_remaining, 0);
+          return (
+            <Link
+              to="/wheel"
+              className="block rounded-2xl border-2 border-accent/50 bg-accent/10 p-4 active:scale-[0.99] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-11 w-11 grid place-items-center rounded-full bg-accent/20 shrink-0">
+                  <Zap className="h-5 w-5 text-accent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display text-lg">Spin the Wheel · Double or Nothing</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {spinnable.length > 0
+                      ? `${totalPlays} plays + ${totalVotes} votes live — stake a pack and double it, or lose it.`
+                      : "Buy or win a boost pack below, then stake it on the wheel."}
+                  </p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-accent shrink-0" />
+              </div>
+            </Link>
+          );
+        })()}
+
         {loading ? (
           <div className="text-center py-12"><Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" /></div>
         ) : tracks.length === 0 ? (
