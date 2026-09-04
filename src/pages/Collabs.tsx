@@ -23,6 +23,7 @@ interface Collab {
   created_at: string;
 }
 interface Track { id: string; title: string; audio_url: string | null }
+interface Post { id: string; body: string; created_at: string; author: string }
 
 const GENRES = ["Hip-Hop","Trap","R&B","Pop","Drill","Afrobeat","Country","Rock","Latin","Other"];
 
@@ -38,6 +39,8 @@ export default function Collabs() {
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState<string>("Hip-Hop");
   const [beatId, setBeatId] = useState<string>("");
+  const [rooms, setRooms] = useState<Record<string, string>>({});
+  const [feed, setFeed] = useState<Record<string, Post[]>>({});
 
   const load = async () => {
     setLoading(true);
@@ -51,7 +54,52 @@ export default function Collabs() {
     const counts: Record<string, number> = {};
     ((m as any) ?? []).forEach((r: any) => { counts[r.collab_id] = (counts[r.collab_id] ?? 0) + 1; });
     setMembers(counts);
+    await loadFeed(((c as any) ?? []).map((x: any) => x.id));
     setLoading(false);
+  };
+
+  // Pull each collab's chatroom and its latest posts so the feed mirrors the chat.
+  const loadFeed = async (collabIds: string[]) => {
+    if (collabIds.length === 0) { setRooms({}); setFeed({}); return; }
+    const { data: rs } = await supabase
+      .from("chatrooms")
+      .select("id, collab_id")
+      .in("collab_id", collabIds);
+    const roomMap: Record<string, string> = {};
+    const byRoom: Record<string, string> = {};
+    ((rs as any) ?? []).forEach((r: any) => {
+      if (r.collab_id) { roomMap[r.collab_id] = r.id; byRoom[r.id] = r.collab_id; }
+    });
+    setRooms(roomMap);
+    const roomIds = Object.keys(byRoom);
+    if (roomIds.length === 0) { setFeed({}); return; }
+    const { data: msgs } = await supabase
+      .from("chat_messages")
+      .select("id, room_id, author_id, body, created_at")
+      .in("room_id", roomIds)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    const authorIds: string[] = Array.from(new Set<string>(((msgs as any) ?? []).map((x: any) => x.author_id as string)));
+    const names: Record<string, string> = {};
+    if (authorIds.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, artist_name").in("id", authorIds);
+      ((profs as any) ?? []).forEach((p: any) => { names[p.id] = p.artist_name; });
+    }
+    const grouped: Record<string, Post[]> = {};
+    ((msgs as any) ?? []).forEach((mm: any) => {
+      const cid = byRoom[mm.room_id];
+      if (!cid) return;
+      grouped[cid] ??= [];
+      if (grouped[cid].length < 3) {
+        grouped[cid].push({
+          id: mm.id,
+          body: mm.body,
+          created_at: mm.created_at,
+          author: names[mm.author_id] ?? "Artist",
+        });
+      }
+    });
+    setFeed(grouped);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [user?.id]);
@@ -147,6 +195,29 @@ export default function Collabs() {
             {c.beat_track_id && beatUrl(c.beat_track_id) && (
               <AudioPlayer src={beatUrl(c.beat_track_id)!} compact />
             )}
+
+            {/* Latest chat posts, straight from this collab's room */}
+            <div className="rounded-lg bg-secondary/60 border border-border p-2 space-y-1.5">
+              <p className="text-[10px] text-muted-foreground tracking-widest">LATEST IN CHAT</p>
+              {(feed[c.id] ?? []).length === 0 ? (
+                <p className="text-[11px] text-muted-foreground">
+                  {rooms[c.id] ? "No posts yet — join the chat and start it off." : "Chat opens once you join."}
+                </p>
+              ) : (
+                (feed[c.id] ?? []).map(p => (
+                  <div key={p.id} className="text-[11px] leading-snug">
+                    <span className="font-bold">{p.author}</span>{" "}
+                    <span className="text-foreground/90">{p.body}</span>{" "}
+                    <span className="text-muted-foreground">· {new Date(p.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                  </div>
+                ))
+              )}
+              {rooms[c.id] && (
+                <Link to={`/chat/${rooms[c.id]}`} className="inline-block text-[11px] font-bold text-primary">
+                  Open collab chat →
+                </Link>
+              )}
+            </div>
           </div>
         ))}
       </div>
