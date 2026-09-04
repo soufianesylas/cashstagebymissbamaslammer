@@ -107,17 +107,36 @@ async function fetchProduct(pkg: string, sku: string, token: string, accessToken
   return await res.json();
 }
 
+// Confirms with Google's Voided Purchases API that a purchase token was
+// actually refunded/charged back. Looks back 30 days.
+async function isVoidedWithGoogle(pkg: string, purchaseToken: string, accessToken: string) {
+  const startTime = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const res = await fetch(
+    `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${pkg}/purchases/voidedpurchases?startTime=${startTime}&maxResults=1000`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  if (!res.ok) return false;
+  const json = await res.json();
+  const list: any[] = json?.voidedPurchases ?? [];
+  return list.some((v) => v?.purchaseToken === purchaseToken);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: cors });
   }
 
-  // 1. Optional shared-secret check
+  // 1. Shared-secret check (REQUIRED — no token configured means no access)
   const expectedToken = Deno.env.get("PLAY_RTDN_PUSH_TOKEN");
-  if (expectedToken) {
+  if (!expectedToken) {
+    console.error("play-rtdn-webhook: PLAY_RTDN_PUSH_TOKEN is not configured");
+    return new Response("forbidden", { status: 403, headers: cors });
+  }
+  {
     const url = new URL(req.url);
-    if (url.searchParams.get("token") !== expectedToken) {
+    const headerToken = req.headers.get("x-play-rtdn-token");
+    if (url.searchParams.get("token") !== expectedToken && headerToken !== expectedToken) {
       console.warn("play-rtdn-webhook: bad or missing push token");
       return new Response("forbidden", { status: 403, headers: cors });
     }
@@ -225,6 +244,13 @@ Deno.serve(async (req) => {
     // --- Voided purchase (refund / chargeback) ---
     const voided = payload.voidedPurchaseNotification;
     if (voided?.purchaseToken) {
+      // Re-verify with Google that this purchase really was voided before we
+      // revoke anything — never trust the payload alone.
+      const confirmed = await isVoidedWithGoogle(pkg, voided.purchaseToken, accessToken);
+      if (!confirmed) {
+        console.warn("play-rtdn-webhook: voided notification not confirmed by Google");
+        return new Response("ok", { status: 200, headers: cors });
+      }
       // Revoke any boost rows tied to this purchase token. We store the
       // purchase_token on track_boosts when grants are issued; if a refund
       // hits, zero them out so the artist can't keep playing/voting on a
