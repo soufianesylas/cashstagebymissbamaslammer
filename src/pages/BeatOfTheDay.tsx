@@ -48,6 +48,7 @@ const useCountdown = (target: Date) => {
 };
 
 import { signedTrackUrls } from "@/lib/storage";
+import AudioPlayer from "@/components/AudioPlayer";
 
 const BeatOfTheDay = () => {
   const { user } = useAuth();
