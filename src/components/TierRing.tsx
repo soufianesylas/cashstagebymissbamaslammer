@@ -1,18 +1,18 @@
 import { Crown } from "lucide-react";
 import type { ReactNode } from "react";
 
-export type RingTier = "free" | "premium" | "vip";
+export type RingTier = "free" | "premium" | "platinum" | "vip";
 
-/** Silver ring = Platinum, gold ring = VIP. Free members get a plain border. */
+/** Silver ring = Platinum/Premium, gold ring = VIP. Free members get a plain border. */
 export const ringClass = (tier: RingTier) =>
   tier === "vip"
     ? "ring-4 ring-accent shadow-[0_0_18px_hsl(var(--accent)/0.55)]"
-    : tier === "premium"
+    : tier === "premium" || tier === "platinum"
     ? "ring-4 ring-muted-foreground shadow-[0_0_14px_hsl(var(--muted-foreground)/0.45)]"
     : "ring-2 ring-border";
 
 export const tierLabel = (tier: RingTier) =>
-  tier === "vip" ? "VIP" : tier === "premium" ? "PLATINUM" : "FREE";
+  tier === "vip" ? "VIP" : tier === "premium" || tier === "platinum" ? "PLATINUM" : "FREE";
 
 export const TierBadge = ({ tier, className = "" }: { tier: RingTier; className?: string }) => (
   <span
