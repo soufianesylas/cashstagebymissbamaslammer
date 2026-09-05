@@ -123,6 +123,7 @@ const ProfileScreen = ({
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default ProfileScreen;
