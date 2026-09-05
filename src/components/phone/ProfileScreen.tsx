@@ -38,7 +38,9 @@ const ProfileScreen = ({
   tier = "ELITE",
   onSettings,
   onShare,
-}: ProfileScreenProps = {}) => (
+}: ProfileScreenProps = {}) => {
+  const subTier = useTier();
+  return (
   <div className="h-full overflow-y-auto scrollbar-hide pb-24 bg-background">
     {/* Cover */}
     <div className="relative h-28 overflow-hidden">

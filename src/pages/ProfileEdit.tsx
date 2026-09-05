@@ -43,6 +43,7 @@ const ProfileEdit = () => {
   const [deleteBusy, setDeleteBusy] = useState(false);
 
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const tier = useTier();
 
   const loadMedia = async (uid: string) => {
     const { data } = await supabase
