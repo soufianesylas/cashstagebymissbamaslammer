@@ -1,6 +1,8 @@
 import { Settings, Share2, Trophy, Flame, Mic, Users, Play, Crown } from "lucide-react";
 import rapperRed from "@/assets/rapper-red.jpg";
 import album from "@/assets/album-art.jpg";
+import { useTier } from "@/hooks/useTier";
+import TierRing, { TierBadge } from "@/components/TierRing";
 
 export interface ProfileScreenProps {
   name?: string;

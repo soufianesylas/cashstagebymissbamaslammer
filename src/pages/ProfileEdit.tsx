@@ -13,6 +13,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useTier } from "@/hooks/useTier";
+import { ringClass, TierBadge } from "@/components/TierRing";
 
 interface MediaItem {
   id: string;
