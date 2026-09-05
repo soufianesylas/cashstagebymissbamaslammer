@@ -59,11 +59,14 @@ const ProfileScreen = ({
 
     {/* Avatar */}
     <div className="px-4 -mt-10 flex items-end gap-3">
-      <img src={rapperRed} alt={name} className="h-20 w-20 rounded-2xl object-cover ring-4 ring-background" loading="lazy" />
+      <TierRing tier={subTier}>
+        <img src={rapperRed} alt={name} className="h-20 w-20 rounded-2xl object-cover" loading="lazy" />
+      </TierRing>
       <div className="flex-1 min-w-0 pb-1">
         <div className="flex items-center gap-1.5">
           <p className="font-display text-xl truncate">{name}</p>
           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-accent/20 text-accent border border-accent/40">{tier}</span>
+          <TierBadge tier={subTier} />
         </div>
         <p className="text-[10px] text-muted-foreground">{handle}</p>
       </div>
