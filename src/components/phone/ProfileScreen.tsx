@@ -1,6 +1,8 @@
 import { Settings, Share2, Trophy, Flame, Mic, Users, Play, Crown } from "lucide-react";
 import rapperRed from "@/assets/rapper-red.jpg";
 import album from "@/assets/album-art.jpg";
+import { useTier } from "@/hooks/useTier";
+import TierRing, { TierBadge } from "@/components/TierRing";
 
 export interface ProfileScreenProps {
   name?: string;
@@ -36,7 +38,9 @@ const ProfileScreen = ({
   tier = "ELITE",
   onSettings,
   onShare,
-}: ProfileScreenProps = {}) => (
+}: ProfileScreenProps = {}) => {
+  const subTier = useTier();
+  return (
   <div className="h-full overflow-y-auto scrollbar-hide pb-24 bg-background">
     {/* Cover */}
     <div className="relative h-28 overflow-hidden">
@@ -55,11 +59,14 @@ const ProfileScreen = ({
 
     {/* Avatar */}
     <div className="px-4 -mt-10 flex items-end gap-3">
-      <img src={rapperRed} alt={name} className="h-20 w-20 rounded-2xl object-cover ring-4 ring-background" loading="lazy" />
+      <TierRing tier={subTier}>
+        <img src={rapperRed} alt={name} className="h-20 w-20 rounded-2xl object-cover" loading="lazy" />
+      </TierRing>
       <div className="flex-1 min-w-0 pb-1">
         <div className="flex items-center gap-1.5">
           <p className="font-display text-xl truncate">{name}</p>
           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-accent/20 text-accent border border-accent/40">{tier}</span>
+          <TierBadge tier={subTier} />
         </div>
         <p className="text-[10px] text-muted-foreground">{handle}</p>
       </div>
@@ -119,6 +126,7 @@ const ProfileScreen = ({
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default ProfileScreen;

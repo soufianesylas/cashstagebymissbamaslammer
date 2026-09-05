@@ -13,6 +13,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useTier } from "@/hooks/useTier";
+import { ringClass, TierBadge } from "@/components/TierRing";
 
 interface MediaItem {
   id: string;
@@ -41,6 +43,7 @@ const ProfileEdit = () => {
   const [deleteBusy, setDeleteBusy] = useState(false);
 
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const tier = useTier();
 
   const loadMedia = async (uid: string) => {
     const { data } = await supabase
@@ -156,8 +159,11 @@ const ProfileEdit = () => {
             {coverUrl && <img src={coverUrl} alt="cover" className="absolute inset-0 w-full h-full object-cover" />}
           </div>
           <div className="p-3 flex items-center gap-3">
-            <div className="h-16 w-16 rounded-full bg-secondary border-2 border-background -mt-10 overflow-hidden">
-              {avatarUrl && <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />}
+            <div className="flex items-center gap-2 -mt-10">
+              <div className={`h-16 w-16 rounded-full bg-secondary overflow-hidden ${ringClass(tier)}`}>
+                {avatarUrl && <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />}
+              </div>
+              <div className="mt-10"><TierBadge tier={tier} /></div>
             </div>
             <div className="flex flex-wrap gap-2">
               <MediaUploader kind="image" folder="avatar" label="Avatar"
