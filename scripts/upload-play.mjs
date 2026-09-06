@@ -8,7 +8,7 @@
  *     [--track internal|alpha|beta|production] \
  *     [--status draft|inProgress|halted|completed] \
  *     [--notes "release notes"] \
- *     [--package com.missbamaslammer.cashstage]
+ *     [--package com.cash.missalabamaslammer.cashstage]
  *
  * Required env:
  *   GOOGLE_PLAY_SERVICE_ACCOUNT   JSON of the Play service account key
@@ -33,7 +33,7 @@ const AAB = resolve(args.aab || "android/app/build/outputs/bundle/release/app-re
 const TRACK = args.track || "internal";
 const STATUS = args.status || "draft";
 const NOTES = args.notes || `Automated upload ${new Date().toISOString()}`;
-const PKG = args.package || "com.missbamaslammer.cashstage";
+const PKG = args.package || "com.cash.missalabamaslammer.cashstage";
 
 if (!existsSync(AAB)) { console.error(`✖ AAB not found: ${AAB}`); process.exit(1); }
 const saJson = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT;

@@ -1,0 +1,7 @@
+{
+  "lastVersionCode": 59,
+  "note": "Baseline recovered from the production APK on Google Play (package com.cash.missalabamaslammer.cashstage, versionCode 59). Any new upload must be greater than this.",
+  "entries": [
+    { "versionCode": 59, "versionName": "recovered-from-play", "at": "2026-09-06T00:00:00.000Z" }
+  ]
+}

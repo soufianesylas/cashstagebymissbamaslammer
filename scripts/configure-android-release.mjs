@@ -102,7 +102,7 @@ if (haveGoogleServices) {
 writeFileSync(GRADLE, gradle);
 
 // 4. Deep-link intent-filter for Google OAuth (Chrome Custom Tabs callback).
-//    Without this, the `com.missbamaslammer.cashstage://oauth-callback` URL
+//    Without this, the `com.cash.missalabamaslammer.cashstage://oauth-callback` URL
 //    that Lovable Cloud Auth redirects to after Google sign-in won't reopen
 //    the app, so the sign-in flow hangs in the browser. Capacitor regenerates
 //    AndroidManifest.xml on every clean build, so we re-inject here.
@@ -110,7 +110,7 @@ writeFileSync(GRADLE, gradle);
 //    Idempotent — wrapped in <!-- LOVABLE_OAUTH_DEEPLINK --> markers so we
 //    can replace the block in place instead of duplicating it.
 const MANIFEST = resolve(APP, "src/main/AndroidManifest.xml");
-const OAUTH_SCHEME = "com.missbamaslammer.cashstage";
+const OAUTH_SCHEME = "com.cash.missalabamaslammer.cashstage";
 const MARK_START = "<!-- LOVABLE_OAUTH_DEEPLINK -->";
 const MARK_END = "<!-- /LOVABLE_OAUTH_DEEPLINK -->";
 if (existsSync(MANIFEST)) {

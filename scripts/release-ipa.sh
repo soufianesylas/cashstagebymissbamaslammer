@@ -8,7 +8,7 @@
 # Requires (on macOS, with Xcode 15+):
 #   - Node 20+, CocoaPods, Xcode command-line tools
 #   - APPLE_TEAM_ID                        Apple Developer team id (10 chars)
-#   - IOS_BUNDLE_ID                        e.g. com.missbamaslammer.cashstage
+#   - IOS_BUNDLE_ID                        e.g. com.cash.missalabamaslammer.cashstage
 #   - IOS_CODE_SIGN_IDENTITY               e.g. "Apple Distribution: Your Name (TEAMID)"
 #   - IOS_PROVISIONING_PROFILE_UUID        UUID of installed App Store profile
 # Optional (auto-upload to App Store Connect):

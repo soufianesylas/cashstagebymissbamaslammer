@@ -10,7 +10,7 @@ to a published Google Play app.
 - Auth (email + Google), profiles, wallets, anonymous voting
 - Studio: record-with-beat, voice FX, upload finished song, signed-URL playback
 - Live feed / Battle / Solo / Boosts / Judging Sessions / Crews / Chat / Weekly Contests
-- Capacitor configured with permanent `appId: com.missbamaslammer.cashstage`
+- Capacitor configured with permanent `appId: com.cash.missalabamaslammer.cashstage`
 - AdMob gate with 30-second house ad fallback
 - Content moderation: in-app **REPORT** button on every track + `/moderation` admin queue + `is_hidden` filter on feeds
 - Google Play Billing wrapper (`src/lib/billing.ts`) with web-mock fallback
@@ -38,7 +38,7 @@ Then `npx cap sync`. The `src/lib/billing.ts` wrapper auto-detects the plugin at
 
 ### 3. Create the app in Google Play Console
 1. New app → name "Cash Stage" → category Music
-2. Set the package name **`com.missbamaslammer.cashstage`** — must match `capacitor.config.ts`
+2. Set the package name **`com.cash.missalabamaslammer.cashstage`** — must match `capacitor.config.ts`
 3. Complete **Store listing**:
    - App icon → upload `public/app-icon.png` (Play needs 512×512, just resize)
    - Feature graphic (1024×500) — design needed
@@ -64,7 +64,7 @@ In Play Console → Monetize → Products, create these SKUs (must match `src/li
    - "Manage orders and subscriptions"
 2. Download the JSON key
 3. In Lovable Cloud → Secrets, add:
-   - `GOOGLE_PLAY_PACKAGE_NAME` = `com.missbamaslammer.cashstage`
+   - `GOOGLE_PLAY_PACKAGE_NAME` = `com.cash.missalabamaslammer.cashstage`
    - `GOOGLE_PLAY_SERVICE_ACCOUNT` = the entire JSON key contents
 4. The `verify-purchase` edge function will use these to validate every receipt.
 

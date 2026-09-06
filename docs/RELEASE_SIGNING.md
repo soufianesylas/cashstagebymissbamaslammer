@@ -48,7 +48,7 @@ In `Settings → Secrets and variables → Actions` of your GitHub repo, add:
 
 ### 4. Firebase (optional but recommended)
 
-1. Firebase Console → Add Android app → package `com.missbamaslammer.cashstage`
+1. Firebase Console → Add Android app → package `com.cash.missalabamaslammer.cashstage`
 2. Download `google-services.json`
 3. `base64 -w0 google-services.json` → paste into `GOOGLE_SERVICES_JSON_BASE64`
 
