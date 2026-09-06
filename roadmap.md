@@ -1,6 +1,13 @@
 # Roadmap
 
+## Play Store identity (recovered from production APK — see docs/APK_RECOVERY.md)
+- [x] Lock app id to published `com.cash.missalabamaslammer.cashstage`
+- [x] Baseline versionCode 59 so next upload must be higher
+- [ ] Add `com.cash.missalabamaslammer.cashstage://oauth-callback` to the backend auth redirect allow-list (replaces the old `com.missbamaslammer.cashstage` scheme)
+
+## Features
 - [ ] Challenge creation + entry sharing (DB + /challenges page)
+
 - [ ] Wire AudioPlayer into Drops, BeatLibrary, BeatOfTheDay
 - [ ] "Spin the Wheel" tile on Boosts page
 - [ ] Stripe checkout on Pricing ($12.99 Platinum / $22 VIP) + tier badge
