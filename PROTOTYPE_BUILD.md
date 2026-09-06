@@ -29,7 +29,7 @@ npx cap add android
 npx cap add ios       # macOS only
 ```
 
-> The `appId` is already set to `com.missbamaslammer.cashstage` in
+> The `appId` is already set to `com.cash.missalabamaslammer.cashstage` in
 > `capacitor.config.ts`. Do **not** change it — it's permanent on Play Store.
 
 ## 3. Pick a build mode

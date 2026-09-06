@@ -7,7 +7,7 @@ const isProd = process.env.CAP_ENV === 'prod';
 
 const config: CapacitorConfig = {
   // ⚠️ IMPORTANT: appId is PERMANENT once published to Play Store.
-  appId: 'com.missbamaslammer.cashstage',
+  appId: 'com.cash.missalabamaslammer.cashstage',
   appName: 'Cash Stage',
   webDir: 'dist',
   ...(isProd

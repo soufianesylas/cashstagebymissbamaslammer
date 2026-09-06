@@ -76,9 +76,18 @@ if (!tryAapt2() && !fallbackUnzip()) {
 }
 ok(`package=${pkgId || "?"} versionName=${versionName} versionCode=${versionCode}`);
 
-if (process.env.EXPECTED_PACKAGE && pkgId && pkgId !== process.env.EXPECTED_PACKAGE) {
-  fail(`package id ${pkgId} != EXPECTED_PACKAGE=${process.env.EXPECTED_PACKAGE}`);
+// The package id published on Google Play. Recovered from the production APK
+// (versionCode 59). Changing it would create a SECOND Play listing instead of
+// updating Cash Stage, so it is enforced here, not merely documented.
+const PUBLISHED_PACKAGE = "com.cash.missalabamaslammer.cashstage";
+const expectedPkg = process.env.EXPECTED_PACKAGE || PUBLISHED_PACKAGE;
+if (pkgId && pkgId !== expectedPkg) {
+  fail(
+    `package id ${pkgId} != ${expectedPkg}. This bundle would be a NEW Play ` +
+    `app, not an update to Cash Stage. Fix appId in capacitor.config.ts.`
+  );
 }
+
 
 // 3. Play limits + monotonic check
 if (!Number.isInteger(versionCode) || versionCode <= 0) {
