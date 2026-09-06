@@ -59,6 +59,8 @@ const PhoneApp = () => {
   const [collabs, setCollabs] = useState<CollabItem[]>([]);
   const [collabTab, setCollabTab] = useState<CollabTab>("open");
   const [txs, setTxs] = useState<WalletTx[]>([]);
+  const [potCsb, setPotCsb] = useState(0);
+
   const [walletTab, setWalletTab] = useState<"tx" | "earnings">("tx");
 
   const [activeBattle, setActiveBattle] = useState<{ red?: BattleRow; blue?: BattleRow } | null>(null);
@@ -242,8 +244,10 @@ const PhoneApp = () => {
 
   const handleDeposit = () => navigate("/pricing");
   const handleWithdraw = () => toast.info("Withdrawals open at $50 minimum balance. Currently in review.");
-  const handleConnectPayPal = () => toast.info("PayPal connect — coming in next release.");
-  const handleConnectStripe = () => toast.info("Stripe connect — coming in next release.");
+  const handleConnectPayPal = () =>
+    toast.info("Payouts run manually today: reach $50, tap Withdraw, and we email you to confirm your PayPal.");
+  const handleConnectStripe = () => navigate("/pricing");
+
 
   const handleBoostTrack = () => navigate("/boosts");
   const handleTip = async () => {
@@ -277,8 +281,9 @@ const PhoneApp = () => {
       title: t.title,
       plays: formatPlays(t.play_count),
     })),
-    onSearch: () => toast.info("Search — coming next release."),
-    onNotifications: () => toast.info("No new notifications."),
+    onSearch: () => navigate("/search"),
+    onNotifications: () => navigate("/notifications"),
+
     onStartBattle: handleStartBattle,
     onMode: handleMode,
     onViewAllBattles: () => setTab("battles"),
@@ -298,7 +303,7 @@ const PhoneApp = () => {
     blueName: activeBattle?.blue?.artist_name ?? "Awaiting Blue",
     redDuration: activeBattle?.red ? `${Math.floor(activeBattle.red.duration_seconds / 60)}:${String(activeBattle.red.duration_seconds % 60).padStart(2, "0")}` : "—",
     blueDuration: activeBattle?.blue ? `${Math.floor(activeBattle.blue.duration_seconds / 60)}:${String(activeBattle.blue.duration_seconds % 60).padStart(2, "0")}` : "—",
-    prizePoolCsb: 1250,
+    prizePoolCsb: potCsb,
     voted,
     playingSide,
     onBack: () => setTab("home"),
@@ -322,7 +327,7 @@ const PhoneApp = () => {
     onPlay: handlePlayDrop,
     onTip: handleTip,
     onBoost: handleBoostTrack,
-    onComments: () => toast.info("Comments — coming next release."),
+    onComments: () => navigate("/drops"),
   }), [selectedDrop, playingDrop, balance]);
 
   const collabProps = useMemo(() => ({
@@ -331,7 +336,7 @@ const PhoneApp = () => {
     items: collabs,
     onMenu: () => navigate("/crews"),
     onCreateTrack: () => navigate("/studio?mode=collab"),
-    onJoinOpen: () => toast.info("Browse open collabs in the list below."),
+    onJoinOpen: () => { setCollabTab("open"); navigate("/collabs"); },
     onRandomMatch: () => navigate("/studio?mode=collab&random=1"),
     onViewAll: () => navigate("/crews"),
     onJoin: (id: string) => {
