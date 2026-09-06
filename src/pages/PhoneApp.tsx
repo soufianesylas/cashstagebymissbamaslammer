@@ -59,6 +59,8 @@ const PhoneApp = () => {
   const [collabs, setCollabs] = useState<CollabItem[]>([]);
   const [collabTab, setCollabTab] = useState<CollabTab>("open");
   const [txs, setTxs] = useState<WalletTx[]>([]);
+  const [potCsb, setPotCsb] = useState(0);
+
   const [walletTab, setWalletTab] = useState<"tx" | "earnings">("tx");
 
   const [activeBattle, setActiveBattle] = useState<{ red?: BattleRow; blue?: BattleRow } | null>(null);
@@ -301,7 +303,7 @@ const PhoneApp = () => {
     blueName: activeBattle?.blue?.artist_name ?? "Awaiting Blue",
     redDuration: activeBattle?.red ? `${Math.floor(activeBattle.red.duration_seconds / 60)}:${String(activeBattle.red.duration_seconds % 60).padStart(2, "0")}` : "—",
     blueDuration: activeBattle?.blue ? `${Math.floor(activeBattle.blue.duration_seconds / 60)}:${String(activeBattle.blue.duration_seconds % 60).padStart(2, "0")}` : "—",
-    prizePoolCsb: 1250,
+    prizePoolCsb: potCsb,
     voted,
     playingSide,
     onBack: () => setTab("home"),
