@@ -13,4 +13,4 @@
 - [ ] Stripe checkout on Pricing ($12.99 Platinum / $22 VIP) + tier badge
 - [ ] Cash prize flow: daily solo rank $5/day + competition pot with $2 rally tickets
 - [ ] Collab feed: chatroom posts surface in collab feed and /collabs
-- [ ] Play Store update: build signed app-release.aab locally (npm run release:aab) and upload in Play Console
+- [ ] Play Store update v60: on a machine with Java 17 + Android SDK + the upload keystore, run `npm run release:60` (or `npm run release:60:upload` with GOOGLE_PLAY_SERVICE_ACCOUNT). Cannot run in Lovable — no Android SDK / keystore here.
