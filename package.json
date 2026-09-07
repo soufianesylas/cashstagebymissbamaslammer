@@ -22,6 +22,8 @@
     "cap:run:android": "CAP_ENV=prod vite build && CAP_ENV=prod cap sync android && npm run android:bump && cap run android",
     "android:assembleRelease": "cd android && ./gradlew bundleRelease",
     "release:aab": "bash scripts/release-aab.sh",
+    "release:60": "BUILD_NUMBER=60 bash scripts/release-aab.sh",
+    "release:60:upload": "BUILD_NUMBER=60 bash scripts/release-aab.sh --upload --track production --status completed",
     "release:aab:dry": "bash scripts/release-aab.sh --dry-run",
     "release:aab:upload": "bash scripts/release-aab.sh --upload",
     "release:ipa": "bash scripts/release-ipa.sh",
