@@ -13,7 +13,7 @@
  *   the user's wallet / subscription server-side.
  *
  * Required Play Console setup (before live release):
- *   1. Create the app in Play Console with appId `com.missbamaslammer.cashstage`
+ *   1. Create the app in Play Console with appId `com.cash.missalabamaslammer.cashstage`
  *   2. Configure all in-app products / subscriptions with the SKUs listed below
  *   3. Add a service account with "Financial reports" + "Manage orders" perms,
  *      download the JSON, and store it as the `GOOGLE_PLAY_SERVICE_ACCOUNT`
