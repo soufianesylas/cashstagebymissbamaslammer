@@ -35,7 +35,7 @@ import { App, type URLOpenListenerEvent } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
 import { recordAuthError } from "@/lib/authDebug";
 
-export const NATIVE_OAUTH_REDIRECT = "com.missbamaslammer.cashstage://oauth-callback";
+export const NATIVE_OAUTH_REDIRECT = "com.cash.missalabamaslammer.cashstage://oauth-callback";
 
 export const isNativeAndroid = (): boolean =>
   Capacitor.getPlatform?.() === "android";
