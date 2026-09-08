@@ -3,7 +3,7 @@
 ## Play Store identity (recovered from production APK — see docs/APK_RECOVERY.md)
 - [x] Lock app id to published `com.cash.missalabamaslammer.cashstage`
 - [x] Baseline versionCode 59 so next upload must be higher
-- [ ] Add `com.cash.missalabamaslammer.cashstage://oauth-callback` to the backend auth redirect allow-list (replaces the old `com.missbamaslammer.cashstage` scheme)
+- [x] Update native sign-in return address to `com.cash.missalabamaslammer.cashstage://oauth-callback` in code — one manual step left: add that URL in Lovable Cloud → Users → Auth Settings → URL Configuration
 
 ## Features
 - [ ] Challenge creation + entry sharing (DB + /challenges page)
