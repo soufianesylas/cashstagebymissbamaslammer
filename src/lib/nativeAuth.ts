@@ -17,13 +17,13 @@
  *          <action android:name="android.intent.action.VIEW" />
  *          <category android:name="android.intent.category.DEFAULT" />
  *          <category android:name="android.intent.category.BROWSABLE" />
- *          <data android:scheme="com.missbamaslammer.cashstage" />
+ *          <data android:scheme="com.cash.missalabamaslammer.cashstage" />
  *        </intent-filter>
  *
  *   2. Lovable Cloud → Users → Auth Settings → URL Configuration —
  *      add this redirect URL to the allow-list:
  *
- *        com.missbamaslammer.cashstage://oauth-callback
+ *        com.cash.missalabamaslammer.cashstage://oauth-callback
  *
  * On web, this module is a no-op — callers should fall back to the regular
  * lovable.auth.signInWithOAuth() flow.
