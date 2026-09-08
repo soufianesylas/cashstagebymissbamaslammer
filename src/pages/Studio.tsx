@@ -422,43 +422,60 @@ const Studio = () => {
             ))}
           </div>
 
-          {/* Timer */}
-          <div className="relative text-center mt-4">
-            <p className="font-display text-5xl tabular-nums">
-              {formatTime(recorder.elapsed)}
-            </p>
-            <p className="text-[10px] text-muted-foreground tracking-widest mt-1">
-              {isRecording ? "● RECORDING" : isPaused ? "PAUSED" : hasRecording ? "READY TO SAVE" : "READY"}
-            </p>
+          {/* Timer — the one critical metric on this screen */}
+          <div className="relative mt-4">
+            <CriticalMetric
+              value={formatTime(recorder.elapsed)}
+              label={isRecording ? "RECORDING" : isPaused ? "PAUSED" : hasRecording ? "READY TO SAVE" : "READY"}
+              tone={isRecording ? "destructive" : isPaused ? "accent" : "default"}
+              live={isRecording}
+            />
+            {/* Progress rail so state reads at a glance, not just numerically */}
+            <div className="mx-auto mt-3 h-1 w-48 rounded-full bg-secondary overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${isRecording ? "bg-destructive" : isPaused ? "bg-accent" : "bg-primary/40"}`}
+                style={{ width: `${Math.min(100, (recorder.elapsed / 60) * 100)}%` }}
+              />
+            </div>
           </div>
 
-          {/* Mixer (only before recording, when a beat is selected) */}
+          {/* Status row — read-only pills, plus the one action */}
+          <div className="relative mt-5 flex flex-wrap items-center justify-center gap-2">
+            <StatusPill label="MIC CHECK" state={recorder.error ? "off" : "on"} />
+            <StatusPill label={selectedBeat ? "BEAT SYNCED" : "NO BEAT"} state={selectedBeat ? "on" : "off"} />
+            <StatusPill label={`FX · ${effect.toUpperCase()}`} state={effect === "clean" ? "off" : "on"} />
+          </div>
+
+          {/* Your mix — the two sliders live together in one container */}
           {canPickBeat && selectedBeat && (
-            <div className="relative mt-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <label className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Mic className="h-3 w-3" /> MIC</span>
-                  <span>{Math.round(micVolume * 100)}%</span>
-                </div>
-                <input
-                  type="range" min={0} max={1.5} step={0.05}
-                  value={micVolume}
-                  onChange={(e) => setMicVolume(parseFloat(e.target.value))}
-                  className="w-full accent-primary"
-                />
-              </label>
-              <label className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Volume2 className="h-3 w-3" /> BEAT</span>
-                  <span>{Math.round(beatVolume * 100)}%</span>
-                </div>
-                <input
-                  type="range" min={0} max={1.5} step={0.05}
-                  value={beatVolume}
-                  onChange={(e) => setBeatVolume(parseFloat(e.target.value))}
-                  className="w-full accent-accent"
-                />
-              </label>
+            <div className="relative mt-6 max-w-md mx-auto rounded-2xl bg-secondary/50 border border-border p-4">
+              <p className="text-[10px] tracking-widest text-muted-foreground font-bold mb-3">YOUR MIX</p>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Mic className="h-3 w-3" /> VOCAL</span>
+                    <span className="tabular-nums">{Math.round(micVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range" min={0} max={1.5} step={0.05}
+                    value={micVolume}
+                    onChange={(e) => setMicVolume(parseFloat(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                </label>
+                <label className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] tracking-widest text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Volume2 className="h-3 w-3" /> BEAT</span>
+                    <span className="tabular-nums">{Math.round(beatVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range" min={0} max={1.5} step={0.05}
+                    value={beatVolume}
+                    onChange={(e) => setBeatVolume(parseFloat(e.target.value))}
+                    className="w-full accent-accent"
+                  />
+                </label>
+              </div>
             </div>
           )}
 
