@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { FREE_BEATS, type FreeBeat } from "@/data/freeBeats";
 import MediaUploader, { type MediaKind } from "@/components/MediaUploader";
 import MultiTrackRecorder from "@/components/studio/MultiTrackRecorder";
+import { CriticalMetric, StatusPill } from "@/components/studio/StudioPrimitives";
 
 const StudioMediaUploader = ({ kind }: { kind: MediaKind }) => {
   const { user } = useAuth();
