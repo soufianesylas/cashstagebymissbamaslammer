@@ -97,6 +97,40 @@ if (versionCode >= 2_100_000_000) {
   fail(`versionCode ${versionCode} exceeds Play limit (2,100,000,000)`);
 }
 
+// Hard floor: versionCode 59 is live on Play right now. Enforced even when
+// SKIP_HISTORY=1 (CI), because Play rejects anything at or below it.
+const LIVE_VERSION_CODE = 59;
+if (versionCode <= LIVE_VERSION_CODE) {
+  fail(
+    `versionCode ${versionCode} is not greater than the live Play release ` +
+    `(${LIVE_VERSION_CODE}). Set BUILD_NUMBER=${LIVE_VERSION_CODE + 1} or higher.`
+  );
+}
+
+// 3b. Target API level. Play rejects uploads targeting below API 36 since
+//     2026-08-31. Read from the bundle when aapt2 is available, else gradle.
+const REQUIRED_TARGET_SDK = 36;
+let targetSdk = null;
+try {
+  const badging = execSync(`aapt2 dump badging "${AAB}" 2>/dev/null`, { encoding: "utf8" });
+  const t = badging.match(/targetSdkVersion:'(\d+)'/);
+  if (t) targetSdk = Number(t[1]);
+} catch { /* aapt2 unavailable */ }
+if (targetSdk === null && existsSync("android/variables.gradle")) {
+  const t = readFileSync("android/variables.gradle", "utf8").match(/targetSdkVersion\s*=\s*(\d+)/);
+  if (t) targetSdk = Number(t[1]);
+}
+if (targetSdk === null) {
+  console.warn(`⚠ could not determine targetSdkVersion — Play requires ${REQUIRED_TARGET_SDK}`);
+} else if (targetSdk < REQUIRED_TARGET_SDK) {
+  fail(
+    `targetSdkVersion ${targetSdk} is below ${REQUIRED_TARGET_SDK}. Play rejects ` +
+    `this upload. Run 'npm run android:configure' before building.`
+  );
+} else {
+  ok(`targetSdkVersion=${targetSdk}`);
+}
+
 if (process.env.SKIP_HISTORY !== "1") {
   let history = { lastVersionCode: 0, entries: [] };
   if (existsSync(HISTORY)) {
