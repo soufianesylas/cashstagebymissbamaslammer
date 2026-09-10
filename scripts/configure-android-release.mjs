@@ -41,6 +41,26 @@ function writeBase64(envVar, outPath) {
   return true;
 }
 
+// 0. SDK levels. Google Play requires new uploads to target Android 16 (API 36)
+//    since 2026-08-31; anything lower is rejected at upload time. Capacitor
+//    regenerates android/variables.gradle, so force the values here.
+const VARIABLES = resolve(ANDROID, "variables.gradle");
+const REQUIRED_SDK = 36;
+if (existsSync(VARIABLES)) {
+  let vars = readFileSync(VARIABLES, "utf8");
+  for (const key of ["compileSdkVersion", "targetSdkVersion"]) {
+    if (new RegExp(`${key}\\s*=\\s*\\d+`).test(vars)) {
+      vars = vars.replace(new RegExp(`${key}\\s*=\\s*\\d+`), `${key} = ${REQUIRED_SDK}`);
+    } else {
+      vars = vars.replace(/ext\s*\{/, `ext {\n    ${key} = ${REQUIRED_SDK}`);
+    }
+  }
+  writeFileSync(VARIABLES, vars);
+  console.log(`[configure-android-release] compileSdk/targetSdk pinned to ${REQUIRED_SDK}`);
+} else {
+  console.warn(`[configure-android-release] ${VARIABLES} not found — cannot pin targetSdk ${REQUIRED_SDK}`);
+}
+
 // 1 + 2. Signing config
 const haveKeystore = writeBase64("ANDROID_KEYSTORE_BASE64", resolve(APP, "upload-keystore.jks"));
 const storePass = process.env.ANDROID_KEYSTORE_PASSWORD;
