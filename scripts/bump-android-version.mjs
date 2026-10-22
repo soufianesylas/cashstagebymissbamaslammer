@@ -48,7 +48,8 @@ if (Number.isNaN(buildNumber) || buildNumber < 0) {
 // Encoded versionCode keeps it monotonic across releases even if BUILD_NUMBER
 // resets between machines. Cap each segment so we stay under Play's 2.1B limit.
 //   MAJ < 2100, MIN < 100, PAT < 100, BUILD < 100   (more than enough headroom)
-if (MAJ >= 2100 || MIN >= 100 || PAT >= 100 || buildNumber >= 100) {
+const encoding = !process.env.BUILD_NUMBER || !!process.env.ENCODE_VERSION_CODE;
+if (encoding && (MAJ >= 2100 || MIN >= 100 || PAT >= 100 || buildNumber >= 100)) {
   console.error(
     `[bump-android-version] version segments out of range (max 2099.99.99 + build<100)`
   );
