@@ -40,7 +40,7 @@ const Billboard = () => {
 
   return (
     <div className="min-h-screen stage-bg pb-16">
-      <SEO title="Top Billboard | Cash Stage" description="The most-played tracks on Cash Stage." />
+      <SEO title="Top Billboard | Cash Stage" description="The most-played tracks on Cash Stage." path="/billboard" />
       <header className="flex items-center gap-3 px-4 pt-5">
         <button onClick={() => navigate(-1)} aria-label="Back" className="h-10 w-10 grid place-items-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
