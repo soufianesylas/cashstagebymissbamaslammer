@@ -283,6 +283,7 @@ const PhoneApp = () => {
     })),
     onSearch: () => navigate("/search"),
     onNotifications: () => navigate("/notifications"),
+    onBillboard: () => navigate("/billboard"),
 
     onStartBattle: handleStartBattle,
     onMode: handleMode,
