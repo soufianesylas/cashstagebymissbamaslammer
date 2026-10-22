@@ -17,6 +17,7 @@ export interface HomeScreenProps {
   onViewAllTrending?: () => void;
   onOpenBattle?: (id: string) => void;
   onPlayTrack?: (id: string) => void;
+  onBillboard?: () => void;
 }
 
 const defaultBattles = [
@@ -45,6 +46,7 @@ const HomeScreen = ({
   onViewAllTrending,
   onOpenBattle,
   onPlayTrack,
+  onBillboard,
 }: HomeScreenProps = {}) => (
   <div className="h-full overflow-y-auto scrollbar-hide pb-24 stage-bg">
     {/* Status bar */}
@@ -120,6 +122,12 @@ const HomeScreen = ({
         </button>
       ))}
     </div>
+
+    {/* Top Billboard */}
+    <button onClick={onBillboard} className="mx-4 mt-4 w-[calc(100%-2rem)] flex items-center justify-between p-4 rounded-2xl border border-accent/40 bg-accent/10 active:scale-95 transition-transform">
+      <span className="font-display text-lg text-accent">TOP BILLBOARD</span>
+      <span className="text-xs text-muted-foreground">See the charts →</span>
+    </button>
 
     {/* Live battles */}
     <div className="px-5 mt-6 flex items-center justify-between">
