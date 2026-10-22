@@ -40,8 +40,6 @@ jobs:
 
     env:
       CAP_ENV: prod
-      # versionCode = GitHub run number — monotonically increases forever
-      BUILD_NUMBER: ${{ github.run_number }}
 
     steps:
       - name: Checkout
@@ -61,6 +59,9 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Compute versionCode (live Play version is 59; first run = 60)
+        run: echo "BUILD_NUMBER=$((59 + ${{ github.run_number }}))" >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: npm ci
